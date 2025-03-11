@@ -64,51 +64,54 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ onClose }) => {
           ))}
         </div>
       </div>
-      <div></div>
-      {/* Furnishing */}
-      <div className="mb-6">
-        <h3 className="mb-4 text-sm font-semibold">Furnishing</h3>
-        <div className="space-y-2">
-          {["Fully Furnished", "Semi-Furnished", "Unfurnished"].map((type) => (
-            <label
-              key={type}
-              className="flex items-center"
-            >
-              <input
-                type="radio"
-                name="furnishing"
-                className="text-blue-600"
-              />
-              <span className="ml-2 text-sm">{type}</span>
-            </label>
-          ))}
+      <div className="max-h-400 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary dark:[&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:w-1">
+        {/* Furnishing */}
+        <div className="mb-6">
+          <h3 className="mb-4 text-sm font-semibold">Furnishing</h3>
+          <div className="space-y-2">
+            {["Fully Furnished", "Semi-Furnished", "Unfurnished"].map(
+              (type) => (
+                <label
+                  key={type}
+                  className="flex items-center"
+                >
+                  <input
+                    type="radio"
+                    name="furnishing"
+                    className="text-blue-600"
+                  />
+                  <span className="ml-2 text-sm">{type}</span>
+                </label>
+              )
+            )}
+          </div>
         </div>
-      </div>
-      {/* Amenities */}
-      <div className="mb-6">
-        <h3 className="mb-4 text-sm font-semibold">Amenities</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            "WiFi",
-            "Parking",
-            "Air Conditioning",
-            "Balcony",
-            "Pet Friendly",
-            "Gym",
-            "Swimming Pool",
-            "Security",
-          ].map((amenity) => (
-            <label
-              key={amenity}
-              className="flex items-center"
-            >
-              <input
-                type="checkbox"
-                className="rounded border-gray-300 text-blue-600"
-              />
-              <span className="ml-2 text-sm">{amenity}</span>
-            </label>
-          ))}
+        {/* Amenities */}
+        <div className="mb-6">
+          <h3 className="mb-4 text-sm font-semibold">Amenities</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              "WiFi",
+              "Parking",
+              "Air Conditioning",
+              "Balcony",
+              "Pet Friendly",
+              "Gym",
+              "Swimming Pool",
+              "Security",
+            ].map((amenity) => (
+              <label
+                key={amenity}
+                className="flex items-center"
+              >
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-blue-600"
+                />
+                <span className="ml-2 text-sm">{amenity}</span>
+              </label>
+            ))}
+          </div>
         </div>
       </div>
       {/* Apply Filters Button */}

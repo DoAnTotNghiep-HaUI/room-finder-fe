@@ -1,14 +1,15 @@
 import React from "react";
+
+import Button from "@/components/Button/button";
+import { LuSlidersVertical } from "react-icons/lu";
+import AdvanceSearch from "./advance-search";
 import {
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalTrigger,
-} from "./animated-modal";
-import Button from "@/components/Button/button";
-import { LuSlidersVertical } from "react-icons/lu";
-import AdvanceSearch from "./advance-search";
+} from "@/components/Modal/animated-modal";
 
 export default function ModalSearch() {
   return (

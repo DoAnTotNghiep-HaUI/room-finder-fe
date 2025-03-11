@@ -22,15 +22,17 @@ export const UserProfile = () => {
     >
       <button
         type="button"
-        className="flex items-center space-x-3 focus:outline-none"
+        className="relative flex items-center space-x-3 focus:outline-none"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         <img
-          className="h-8 w-8 rounded-full border-2 border-gray-200 dark:border-gray-700"
+          className="h-11 w-11 rounded-full border-2 border-gray-200 dark:border-gray-700"
           src="https://placehold.co/100x100?text=User"
           alt="User profile"
         />
-        <BiChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+        <span className="absolute -bottom-1 -right-1 rounded-full border-2 border-white bg-[#e2e5e9] dark:bg-[#3b3d3e] dark:text-[#e2e5e9]">
+          <BiChevronDown className="h-4 w-4" />
+        </span>
       </button>
       {/* Dropdown Menu */}
       <div
