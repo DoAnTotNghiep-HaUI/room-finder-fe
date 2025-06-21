@@ -5,8 +5,10 @@ import { EmblaOptionsType } from "embla-carousel";
 import "../../components/Carousel/embla-thumbs/embla.css";
 import { BiImage, BiVideo } from "react-icons/bi";
 import { VideoPlayer } from "./video-player";
+import { IFile } from "@/types/file";
+import { URL_IMAGE } from "@/constants";
 interface MediaGalleryProps {
-  images: string[];
+  images: any;
   videos: Array<{
     url: string;
     poster: string;
@@ -20,11 +22,21 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
   const [activeTab, setActiveTab] = useState<"images" | "videos">("images");
   const OPTIONS: EmblaOptionsType = {};
   const SLIDE_COUNT = 10;
-  const imgThumbs = [
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6",
-    "https://images.unsplash.com/photo-1484101403633-562f891dc89a",
-  ];
+  console.log("images", images);
+
+  const imgThumbs = images?.map(
+    (img) =>
+      `${URL_IMAGE}/${
+        img?.directus_files_id?.id
+      }/${img?.directus_files_id?.filename_download}`
+  );
+  console.log("slides", imgThumbs);
+
+  // const imgThumbs = [
+  //   "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
+  //   "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6",
+  //   "https://images.unsplash.com/photo-1484101403633-562f891dc89a",
+  // ];
   return (
     <div className="space-y-4">
       {/* Tab Navigation */}
@@ -34,14 +46,14 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
           className={`flex items-center gap-2 border-b-2 px-4 py-2 transition-colors ${activeTab === "images" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
         >
           <BiImage className="h-5 w-5" />
-          Photos ({images.length})
+          Ảnh ({images?.length})
         </button>
         <button
           onClick={() => setActiveTab("videos")}
           className={`flex items-center gap-2 border-b-2 px-4 py-2 transition-colors ${activeTab === "videos" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
         >
           <BiVideo className="h-5 w-5" />
-          Videos ({videos.length})
+          Video ({videos.length})
         </button>
       </div>
       {/* Media Content */}

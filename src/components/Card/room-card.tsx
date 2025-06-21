@@ -1,3 +1,6 @@
+import { URL_IMAGE } from "@/constants";
+import { IRoom } from "@/types/room";
+import dayjs from "dayjs";
 import React, { useState } from "react";
 import { BiBadgeCheck, BiHeart } from "react-icons/bi";
 import { FaMapPin, FaUser } from "react-icons/fa";
@@ -7,19 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 interface RoomCardProps {
   layout?: "vertical" | "horizontal";
-  room: {
-    id: string;
-    title: string;
-    price: number;
-    size: number;
-    capacity: number;
-    location: string;
-    building?: string;
-    type: string;
-    image: string;
-    postedDate: string;
-    isVerified: boolean;
-  };
+  room: IRoom;
   onCardClick?: () => void;
 }
 export const RoomCard: React.FC<RoomCardProps> = ({
@@ -49,6 +40,11 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     relative overflow-hidden hover:cursor-pointer
     ${layout === "horizontal" ? "w-1/3" : "w-full aspect-[4/3]"}
   `;
+
+  const formatDate = (date: string | Date, format = "DD/MM/YYYY") => {
+    return dayjs(date).format(format);
+  };
+
   return (
     <div
       className={cardClasses}
@@ -57,10 +53,16 @@ export const RoomCard: React.FC<RoomCardProps> = ({
       {/* Image Section */}
       <div
         className={imageContainerClasses}
-        onClick={() => navigate(`/room/${roomId}`)}
+        onClick={() => navigate(`/room/${room?.id}`)}
       >
         <img
-          src={room.image}
+          src={
+            room
+              ? `${URL_IMAGE}/${
+                  room?.photos[0]?.directus_files_id?.id
+                }/${room?.photos[0]?.directus_files_id?.filename_download}`
+              : ""
+          }
           alt={room.title}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
@@ -95,7 +97,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           <div className="flex items-start justify-between">
             <h3
               className="line-clamp-2 text-lg font-semibold text-gray-900 hover:cursor-pointer hover:text-primary dark:text-white"
-              onClick={() => navigate(`/room/${roomId}`)}
+              onClick={() => navigate(`/room/${room?.id}`)}
             >
               {room.title}
             </h3>
@@ -103,14 +105,14 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           {/* Tags and Verification */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-              {room.type}
+              {room?.room_type?.name}
             </span>
-            {room.isVerified && (
+            {/* {room.isVerified && (
               <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-400">
                 <BiBadgeCheck className="h-3 w-3" />
                 Verified
               </span>
-            )}
+            )} */}
           </div>
         </div>
         {/* Details */}
@@ -118,33 +120,36 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
               <TfiRulerAlt2 className="h-4 w-4" />
-              {room.size}m²
+              {room?.acreage}m²
             </div>
             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
               <FaUser className="h-4 w-4" />
-              {room.capacity} {room.capacity === 1 ? "Person" : "People"}
+              {room?.limit_people} Người
             </div>
           </div>
           <div className="flex items-start gap-1 text-sm text-gray-500 dark:text-gray-400">
             <FaMapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
-            <span className="line-clamp-1">{room.location}</span>
+            <span className="line-clamp-1">
+              {room?.building?.specific_address},{room?.building?.ward},
+              {room?.building?.district},{room?.building?.city}
+            </span>
           </div>
-          {room.building && (
+          {room?.building?.name && (
             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
               <LuBuilding2 className="h-4 w-4" />
-              {room.building}
+              {room?.building?.name}
             </div>
           )}
         </div>
         {/* Posted Date */}
         <div className="mt-4 flex items-center justify-between">
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            Posted {room.postedDate}
+            Posted {formatDate(room?.date_created)}
           </p>
           <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-            ${room.price}
+            {room?.room_price}VND
             <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              /mo
+              /Tháng
             </span>
           </p>
         </div>

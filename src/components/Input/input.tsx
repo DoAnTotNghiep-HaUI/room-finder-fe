@@ -1,7 +1,6 @@
 import { cn } from "@/utils/utils";
 import React, { useState, forwardRef } from "react";
-import { FaEye } from "react-icons/fa";
-import { HiEyeOff } from "react-icons/hi";
+import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -80,9 +79,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               {showPassword ? (
-                <HiEyeOff className="h-5 w-5" />
+                <IoEyeOutline className="h-5 w-5" />
               ) : (
-                <FaEye className="h-5 w-5" />
+                <IoEyeOffOutline className="h-5 w-5" />
               )}
             </button>
           )}

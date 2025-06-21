@@ -91,7 +91,10 @@ function LocationCard() {
       >
         {items.slice(0, 8)?.map((itemData, index) => {
           return (
-            <motion.div className="group relative min-h-[25rem] min-w-[20rem] p-2">
+            <motion.div
+              className="group relative min-h-[25rem] min-w-[20rem] p-2"
+              key={index}
+            >
               <img
                 src={itemData.imgSrc}
                 alt="img"

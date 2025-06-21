@@ -5,10 +5,13 @@ import { UserProfile } from "./user-profile";
 import { BiMenu, BiMessageSquare, BiX } from "react-icons/bi";
 import { Notification } from "./notification";
 import { Chat } from "./chats";
-import { ChatUser, Message } from "@/types/messages";
+import { ChatUser, IMessage } from "@/types/messages";
 import { ChatPanel } from "../Chats/chat-panel";
 import { FaFacebookMessenger } from "react-icons/fa";
 import ModalAuth from "../Auth/modal-auth";
+import { useSelector } from "react-redux";
+import { AppState } from "@/redux";
+import ChatWindowContainer from "../Chat";
 const mockNotifications = [
   {
     id: "notif1",
@@ -146,12 +149,10 @@ interface HeaderProps {
     unread: boolean;
   }[];
 }
-export const Header: React.FC<HeaderProps> = ({
-  onChatSelect,
-  unreadMessages,
-  onlineUsers,
-  recentChats,
-}) => {
+export const Header = () => {
+  const { userInfo } = useSelector((state: AppState) => state.auth);
+  console.log("userInfo", userInfo);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -162,6 +163,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [showChatPanel, setShowChatPanel] = useState(false);
   const [messages, setMessages] = useState(mockMessages);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  console.log("userInfo", userInfo);
 
   useEffect(() => {
     const count = notifications.filter(
@@ -169,17 +171,17 @@ export const Header: React.FC<HeaderProps> = ({
     ).length;
     setUnreadCount(count);
   }, [notifications]);
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 0) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (window.scrollY > 0) {
+  //       setIsScrolled(true);
+  //     } else {
+  //       setIsScrolled(false);
+  //     }
+  //   };
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
   const markNotificationAsRead = (notificationId: string) => {
     setNotifications(
       notifications.map((notification) =>
@@ -215,36 +217,43 @@ export const Header: React.FC<HeaderProps> = ({
                 onChatClick={markNotificationAsRead}
               /> */}
             <div className="flex items-center space-x-4">
-              {/* <div className="relative ml-3">
-                <button
-                  className="relative rounded-full bg-[#e2e5e9] p-3 text-black hover:bg-gray-300 focus:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-[#3b3d3e] dark:text-[#e2e5e9]"
-                  onClick={toggleChatPanel}
-                >
-                  <FaFacebookMessenger className="h-5 w-5" />
-                  {unreadMessages > 0 && (
-                    <span className="absolute right-1 top-1 block flex h-5 w-5 -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                      {unreadMessages}
-                    </span>
-                  )}
-                </button>
-                {showChatPanel && (
-                  <ChatPanel
-                    onlineUsers={onlineUsers}
-                    recentChats={recentChats}
-                    onChatSelect={(user) => {
-                      onChatSelect(user);
-                      setShowChatPanel(false);
-                    }}
+              {userInfo ? (
+                <>
+                  <div className="relative ml-3">
+                    {/* <button
+                      className="relative rounded-full bg-[#e2e5e9] p-3 text-black hover:bg-gray-300 focus:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-[#3b3d3e] dark:text-[#e2e5e9]"
+                      onClick={toggleChatPanel}
+                    >
+                      <FaFacebookMessenger className="h-5 w-5" />
+                      {unreadMessages > 0 && (
+                        <span className="absolute right-1 top-1 block flex h-5 w-5 -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                          {unreadMessages}
+                        </span>
+                      )}
+                    </button> */}
+                    <ChatWindowContainer />
+                    {/* {showChatPanel && (
+                      <ChatPanel
+                        onlineUsers={onlineUsers}
+                        recentChats={recentChats}
+                        onChatSelect={(user) => {
+                          onChatSelect(user);
+                          setShowChatPanel(false);
+                        }}
+                      />
+                     
+                    )} */}
+                  </div>
+                  <Notification
+                    unreadCount={unreadCount}
+                    notifications={notifications}
+                    onNotificationClick={markNotificationAsRead}
                   />
-                )}
-              </div>
-              <Notification
-                unreadCount={unreadCount}
-                notifications={notifications}
-                onNotificationClick={markNotificationAsRead}
-              />
-              <UserProfile /> */}
-              <ModalAuth />
+                  <UserProfile user={userInfo} />
+                </>
+              ) : (
+                <ModalAuth />
+              )}
               {/* <button
                 type="button"
                 className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden"

@@ -1,12 +1,17 @@
-export interface Message {
+import { IUser } from "./user";
+
+export interface IMessage {
   id: string;
-  senderId: string;
-  receiverId: string;
+  sender: string;
+  receiver: string;
   content: string;
   type: "text" | "image" | "link";
   timestamp: Date;
-  read: boolean;
   reactions?: string[];
+  status: "sent" | "delivered" | "read";
+  conversation: string;
+  date_created: string;
+  user_created: IUser;
 }
 export interface Notification {
   id: string;

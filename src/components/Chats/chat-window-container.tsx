@@ -15,14 +15,12 @@ interface ChatWindowContainerProps {
     content: string,
     type: "text" | "image" | "link"
   ) => void;
-  onReaction: (messageId: string, reaction: string) => void;
 }
 export const ChatWindowContainer: React.FC<ChatWindowContainerProps> = ({
   activeChats,
   onClose,
   onMinimize,
   onSendMessage,
-  onReaction,
 }) => {
   return (
     <div className="fixed bottom-0 right-0 z-40 flex items-end space-x-4 px-4">
@@ -37,7 +35,6 @@ export const ChatWindowContainer: React.FC<ChatWindowContainerProps> = ({
           onSendMessage={(content, type) =>
             onSendMessage(chat.user.id, content, type)
           }
-          onReaction={onReaction}
           style={{
             zIndex: activeChats.length - index,
           }}

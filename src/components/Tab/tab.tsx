@@ -28,18 +28,18 @@ export const Tabs = ({
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrollRef.current) {
-        setIsScrolled(scrollRef.current.scrollLeft > 0);
-      }
-    };
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (scrollRef.current) {
+  //       setIsScrolled(scrollRef.current.scrollLeft > 0);
+  //     }
+  //   };
 
-    scrollRef.current?.addEventListener("scroll", handleScroll);
-    return () => {
-      scrollRef.current?.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+  //   scrollRef.current?.addEventListener("scroll", handleScroll);
+  //   return () => {
+  //     scrollRef.current?.removeEventListener("scroll", handleScroll);
+  //   };
+  // }, []);
   return (
     <div className="relative w-full overflow-hidden">
       {/* Tab Navigation */}

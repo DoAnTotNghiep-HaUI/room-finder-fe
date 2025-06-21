@@ -18,6 +18,10 @@ import PaginationCustom from "@/components/Pagination/pagination-custom";
 import InputSearch from "@/components/Search/input-search";
 import { Pagination } from "@/components/Pagination/pagination";
 import { RoomCard } from "@/components/Card/room-card";
+import { io } from "socket.io-client";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, AppState } from "@/redux";
+import { getListRoom } from "@/redux/room/action";
 const sampleRooms = [
   {
     id: "1",
@@ -143,6 +147,8 @@ const blogPosts = [
   },
 ];
 function HomePage() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { roomList } = useSelector((state: AppState) => state.room);
   const [assignedTo, setAssignedTo] = useState<string | number>("");
 
   const listRoomCard = useInViewEffect();
@@ -157,18 +163,44 @@ function HomePage() {
   };
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrollRef.current) {
-        setIsScrolled(scrollRef.current.scrollLeft > 0);
-      }
-    };
 
-    scrollRef.current?.addEventListener("scroll", handleScroll);
-    return () => {
-      scrollRef.current?.removeEventListener("scroll", handleScroll);
-    };
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (scrollRef.current) {
+  //       setIsScrolled(scrollRef.current.scrollLeft > 0);
+  //     }
+  //   };
+
+  //   scrollRef.current?.addEventListener("scroll", handleScroll);
+  //   return () => {
+  //     scrollRef.current?.removeEventListener("scroll", handleScroll);
+  //   };
+  // }, []);
+  // const socket = io("ws://localhost:8055", {
+  //   path: "/chat/socket",
+  // });
+
+  // // Join conversation room
+  // socket.emit("join", 5); // room theo conversation_id
+
+  // // Gửi tin nhắn
+  // socket.emit("send_message", {
+  //   conversation: 5,
+  //   receiver: "9c600637-f106-494c-9c22-2ef90f419873",
+  //   sender: "2d77e67f-913b-45c8-91b0-ec8d711445f6",
+  //   content: "Alo",
+  //   type: "text",
+  // });
+
+  // // Lắng nghe tin nhắn mới
+  // socket.on("new_message", (msg) => {
+  //   console.log("New message:", msg);
+  // });
+  useEffect(() => {
+    dispatch(getListRoom());
   }, []);
+  console.log("roomLisst", roomList);
+
   return (
     <>
       <div className="relative">
@@ -269,7 +301,7 @@ function HomePage() {
           className="mx-auto grid gap-4 sm:max-w-[100%] sm:grid-cols-1 sm:px-4 md:grid-cols-2 sm:lg:grid-cols-3 lg:max-w-[70%] lg:grid-cols-3 lg:px-8"
         >
           {/* {[...Array(6).keys()].map((i) => ( */}
-          {sampleRooms.map((room, i) => (
+          {roomList?.map((room, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -335,7 +367,7 @@ function HomePage() {
           ref={topRoomCard.ref}
           className="mx-auto grid gap-4 sm:max-w-[100%] sm:grid-cols-1 sm:px-4 md:grid-cols-2 sm:lg:grid-cols-3 lg:max-w-[70%] lg:grid-cols-3 lg:px-8"
         >
-          {sampleRooms.map((room, i) => (
+          {roomList?.map((room, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.8, y: 20 }}

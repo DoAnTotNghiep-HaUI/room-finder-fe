@@ -11,13 +11,14 @@ type PropType = {
 const EmblaCarousel: React.FC<PropType> = (props) => {
   const { slides, options } = props;
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(slides[0]);
+  const [selectedImage, setSelectedImage] = useState(slides?.[0] || "");
 
   const [emblaMainRef, emblaMainApi] = useEmblaCarousel(options);
   const [emblaThumbsRef, emblaThumbsApi] = useEmblaCarousel({
     containScroll: "keepSnaps",
     dragFree: true,
   });
+  console.log("slides", slides);
 
   const onThumbClick = useCallback(
     (index: number) => {

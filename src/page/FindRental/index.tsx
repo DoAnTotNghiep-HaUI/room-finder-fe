@@ -9,88 +9,11 @@ import { ViewToggle } from "@/page/Blog/view-toggle";
 import { ActiveFilters } from "./active-filter";
 import Select from "@/components/Input/selectAi";
 import { SortOptionRoom, ViewMode } from "@/constants";
+import { useSelector } from "react-redux";
+import { AppState } from "@/redux";
 
-const sampleRooms = [
-  {
-    id: "1",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "2",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "3",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "4",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "5",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "6",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-];
 const FindRental = () => {
+  const { roomList } = useSelector((state: AppState) => state.room);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOptionRoom>("latest");
@@ -159,7 +82,7 @@ const FindRental = () => {
                   : "space-y-6"
               }
             >
-              {sampleRooms.map((room) => (
+              {roomList?.map((room) => (
                 <RoomCard
                   key={room.id}
                   room={room}

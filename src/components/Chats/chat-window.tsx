@@ -1,4 +1,4 @@
-import { ChatUser, Message } from "@/types/messages";
+import { ChatUser, IMessage } from "@/types/messages";
 import React, { useEffect, useState, useRef } from "react";
 import { BiImage, BiSend, BiSmile, BiX } from "react-icons/bi";
 import { BsPaperclip } from "react-icons/bs";
@@ -13,12 +13,11 @@ import { cn } from "@/utils/utils";
 
 interface ChatWindowProps {
   user: ChatUser;
-  messages: Message[];
+  messages: IMessage[];
   isTyping?: boolean;
   onClose: () => void;
   onMinimize: () => void;
   onSendMessage: (content: string, type: "text" | "image" | "link") => void;
-  onReaction: (messageId: string, reaction: string) => void;
   style?: React.CSSProperties;
 }
 export const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -28,7 +27,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   onClose,
   onMinimize,
   onSendMessage,
-  onReaction,
   style,
 }) => {
   const [message, setMessage] = useState("");
@@ -48,7 +46,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       setMessage("");
     }
   };
-  const reactions = ["❤️", "👍", "😂", "😮", "😢", "😡"];
   return (
     <div
       className="flex w-80 flex-col rounded-t-lg bg-white shadow-xl"
@@ -95,27 +92,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`group relative ${msg.senderId === "user1" ? "text-right" : "text-left"}`}
+            className={`group relative ${msg.sender === "user1" ? "text-right" : "text-left"}`}
           >
             <div
-              className={`relative inline-block max-w-[70%] rounded-3xl ${msg.senderId === "user1" ? "bg-blue-600 text-left text-white" : "bg-gray-100 text-right text-gray-900"} px-3 py-2 text-sm`}
+              className={`relative inline-block max-w-[70%] rounded-3xl ${msg.sender === "user1" ? "bg-blue-600 text-left text-white" : "bg-gray-100 text-right text-gray-900"} px-3 py-2 text-sm`}
               onMouseEnter={() => setShowReactions(msg.id)}
               onMouseLeave={() => setShowReactions(null)}
             >
               {msg.content}
-              {showReactions === msg.id && (
-                <div className="absolute -top-10 left-0 flex space-x-1 rounded-full bg-white px-2 py-1 shadow-lg">
-                  {reactions.map((reaction) => (
-                    <button
-                      key={reaction}
-                      className="transition-transform hover:scale-125"
-                      onClick={() => onReaction(msg.id, reaction)}
-                    >
-                      {reaction}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
             {msg.reactions?.length > 0 && (
               <div className="mt-1 flex space-x-1 text-xs">
