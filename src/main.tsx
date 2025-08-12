@@ -7,12 +7,15 @@ import App from "./App";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import store from "./redux";
+import Layout from "./layout/layout";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
-    <App />
+    <Layout>
+      <App />
+    </Layout>
   </Provider>
 );

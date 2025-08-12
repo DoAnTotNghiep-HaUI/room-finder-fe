@@ -1,8 +1,23 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import { combineReducers } from "redux";
+import authReducer from "./auth/store";
+import roomReducer from "./room/store";
+import roomDetailReducer from "./room-detail/store";
+import conversationReducer from "./conversation/store";
+import conversationDetailReducer from "./conversation-detail/store";
+import chatSocketReducer from "./chat/store";
+import messageReducer from "./message/store";
 
-const rootReduce = combineReducers({});
+const rootReduce = combineReducers({
+  auth: authReducer,
+  room: roomReducer,
+  roomDetail: roomDetailReducer,
+  conversation: conversationReducer,
+  conversationDetail: conversationDetailReducer,
+  chatSocket: chatSocketReducer,
+  message: messageReducer,
+});
 const store = configureStore({ reducer: rootReduce });
 
 export type RootState = ReturnType<typeof store.getState>;
