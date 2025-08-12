@@ -16,7 +16,7 @@ export const getRoomDetail = createAsyncThunk(
             "building.landlord.avatar.*",
             "building.landlord.landlord_verification.*",
             "photos.*",
-            "photos.directus_files_id.*",
+            "video.*",
           ],
         })
       );

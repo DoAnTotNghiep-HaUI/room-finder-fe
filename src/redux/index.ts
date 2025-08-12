@@ -6,7 +6,7 @@ import roomReducer from "./room/store";
 import roomDetailReducer from "./room-detail/store";
 import conversationReducer from "./conversation/store";
 import conversationDetailReducer from "./conversation-detail/store";
-
+import chatSocketReducer from "./chat/store";
 import messageReducer from "./message/store";
 
 const rootReduce = combineReducers({
@@ -15,6 +15,7 @@ const rootReduce = combineReducers({
   roomDetail: roomDetailReducer,
   conversation: conversationReducer,
   conversationDetail: conversationDetailReducer,
+  chatSocket: chatSocketReducer,
   message: messageReducer,
 });
 const store = configureStore({ reducer: rootReduce });

@@ -2,7 +2,7 @@ import { URL_IMAGE } from "@/constants";
 import React from "react";
 import { BiShield, BiStar } from "react-icons/bi";
 import { CiWarning } from "react-icons/ci";
-
+import noneAvatar from "../../assets/images/Profile_avatar_placeholder_large.png";
 export const OwnerProfile = ({ owner }) => {
   // const owner = {
   //   name: "Sarah Johnson",
@@ -14,15 +14,19 @@ export const OwnerProfile = ({ owner }) => {
   //   avatar: "https://placehold.co/200x200?text=SJ",
   // };
   console.log("owner", owner);
-  console.log("verified", owner?.landlord_verification[0].isVerified);
+  console.log("verified", owner?.landlord_verification[0]?.isVerified);
 
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="flex items-start gap-4">
         <img
-          src={`${URL_IMAGE}/${
-            owner?.avatar?.id
-          }/${owner?.avatar?.filename_download}`}
+          src={
+            owner?.avatar
+              ? `${URL_IMAGE}/${
+                  owner?.avatar?.id
+                }/${owner?.avatar?.filename_download}`
+              : noneAvatar
+          }
           alt={owner?.last_name}
           className="h-16 w-16 rounded-full object-cover"
         />
@@ -41,7 +45,7 @@ export const OwnerProfile = ({ owner }) => {
         </div>
       </div>
       <div className="mt-4 space-y-3">
-        {owner?.landlord_verification[0].isVerified === true ? (
+        {owner?.landlord_verification[0]?.isVerified === true ? (
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <BiShield className="h-4 w-4 text-green-600" />
             <span>Đã xác minh</span>

@@ -6,11 +6,15 @@ import { AppDispatch, AppState } from "@/redux";
 import { useEffect } from "react";
 import { checkConversationExists } from "@/redux/conversation/action";
 import { useParams } from "react-router-dom";
+import TempChatWindow from "./temp-chat-window";
+import {
+  closeTempConversation,
+  confirmTempConversation,
+} from "@/redux/conversation/store";
 
 const ChatContainer: React.FC = () => {
-  const { conversations, currentConversationId } = useSelector(
-    (state: AppState) => state.conversation
-  );
+  const { conversations, currentConversationId, tempConversation } =
+    useSelector((state: AppState) => state.conversation);
   const { userInfo } = useSelector((state: AppState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const { userId2 } = useParams();
@@ -36,6 +40,15 @@ const ChatContainer: React.FC = () => {
         <ChatWindow
           // key={conversationId}
           conversationId={currentConversationId}
+        />
+      )}
+      {tempConversation.isOpen && (
+        <TempChatWindow
+          partnerId={tempConversation.partnerId!}
+          onClose={() => dispatch(closeTempConversation())}
+          onConfirm={(conversationId) =>
+            dispatch(confirmTempConversation(conversationId))
+          }
         />
       )}
       {/* ))} */}

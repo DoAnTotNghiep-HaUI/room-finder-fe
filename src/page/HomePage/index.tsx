@@ -22,6 +22,7 @@ import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, AppState } from "@/redux";
 import { getListRoom } from "@/redux/room/action";
+
 const sampleRooms = [
   {
     id: "1",
@@ -347,6 +348,7 @@ function HomePage() {
             <p className="pb-2 text-center text-lg text-primary">
               Dịch vụ của chúng tôi
             </p>
+
             <p className="text-center text-4xl">Chúng tôi làm gì?</p>
           </div>
           <div className="flex justify-center sm:px-4 lg:px-8">

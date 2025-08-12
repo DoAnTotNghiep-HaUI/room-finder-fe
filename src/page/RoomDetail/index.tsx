@@ -17,12 +17,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import BookingModal from "@/components/Modal/booking-modal";
 import { Bounce, Slide, toast, ToastContainer } from "react-toastify";
-import { setConversationId } from "@/redux/conversation/store";
+import {
+  openTempConversation,
+  setConversationId,
+} from "@/redux/conversation/store";
+import {
+  checkConversationExists,
+  createConversation,
+  openChatWithUser,
+} from "@/redux/conversation/action";
 
 export const RoomDetail = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const { roomDetail } = useSelector((state: AppState) => state.roomDetail);
+  const { currentConversationId } = useSelector(
+    (state: AppState) => state.conversation
+  );
+  const { userInfo } = useSelector((state: AppState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
+
   const { roomId } = useParams();
   useEffect(() => {
     dispatch(getRoomDetail(roomId));
@@ -58,8 +71,38 @@ export const RoomDetail = () => {
     });
     // In a real app, you would send this data to your backend
   };
-  const handleOpenChatWindow = () => {
-    dispatch(setConversationId("0"));
+  console.log("currentConversationId", currentConversationId);
+
+  const handleChatWithOwner = async () => {
+    const existingConvs = await dispatch(
+      checkConversationExists({
+        userId1: userInfo.id,
+        userId2: roomDetail?.building?.landlord?.id,
+      })
+    ).unwrap();
+
+    let conversationId: string;
+
+    // 2. Nếu đã tồn tại
+    if (existingConvs.length > 0) {
+      conversationId = existingConvs[0].id;
+      console.log("Using existing conversation:", conversationId);
+    }
+    // 3. Nếu chưa tồn tại, tạo mới
+    else {
+      const res = await dispatch(
+        createConversation({
+          participants: [
+            { directus_users_id: userInfo.id },
+            { directus_users_id: roomDetail?.building?.landlord?.id },
+          ],
+        })
+      ).unwrap();
+      conversationId = res.id;
+      console.log("Created new conversation:", conversationId);
+    }
+    dispatch(setConversationId(conversationId));
+    dispatch(openChatWithUser(roomDetail?.building?.landlord?.id));
   };
   const roomData = {
     title: "Modern Studio Apartment in Downtown",
@@ -91,6 +134,8 @@ export const RoomDetail = () => {
       address: "123 Main Street, New York, NY 10001",
     },
   };
+  console.log("video", roomDetail?.video);
+
   return (
     <>
       <div className="min-h-screen bg-gray-50">
@@ -100,7 +145,7 @@ export const RoomDetail = () => {
               {roomDetail?.photos && (
                 <MediaGallery
                   images={roomDetail.photos}
-                  videos={roomData.videos}
+                  video={roomDetail.video}
                 />
               )}
               <div className="rounded-lg bg-white p-6 shadow-sm">
@@ -141,7 +186,7 @@ export const RoomDetail = () => {
                       Gọi cho chủ phòng
                     </button>
                     <button
-                      onClick={() => handleOpenChatWindow()}
+                      onClick={handleChatWithOwner}
                       className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
                     >
                       <IoMail className="h-5 w-5" />

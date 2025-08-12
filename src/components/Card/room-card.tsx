@@ -59,8 +59,8 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           src={
             room
               ? `${URL_IMAGE}/${
-                  room?.photos[0]?.directus_files_id?.id
-                }/${room?.photos[0]?.directus_files_id?.filename_download}`
+                  room?.photos[0]?.id
+                }/${room?.photos[0]?.filename_download}`
               : ""
           }
           alt={room.title}

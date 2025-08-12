@@ -29,7 +29,7 @@ export interface IConversation {
   participants: any;
   last_message?: IMessage;
   unread_count: number;
-  last_message_time?: string;
+  last_message_time?: string | Date;
   isTyping?: boolean;
   user_created?: string | Date;
   date_created?: string | Date;
@@ -39,6 +39,10 @@ export interface ConversationParam {
   conversations: IConversation[] | null;
   error: string | null;
   currentConversationId?: string | null;
+  tempConversation: {
+    partnerId: string | null;
+    isOpen: boolean;
+  };
 }
 export interface ConversationDetailParam {
   isLoading: boolean;

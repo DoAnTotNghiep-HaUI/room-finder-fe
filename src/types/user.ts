@@ -1,3 +1,5 @@
+import { IFile } from "./file";
+
 export interface AuthParams {
   isLoading: boolean;
   errorMessage: string;
@@ -8,7 +10,7 @@ export interface AuthParams {
   expires_at;
 }
 export interface IUser {
-  avatar: string;
+  avatar: IFile;
   // active: string;
   createdAt: string;
   email: string;

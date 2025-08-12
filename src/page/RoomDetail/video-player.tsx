@@ -1,15 +1,16 @@
+import { URL_IMAGE } from "@/constants";
 import React, { useState, useRef } from "react";
 import { BiPause, BiPlay } from "react-icons/bi";
 import { FaMaximize } from "react-icons/fa6";
 import { LuVolume2, LuVolumeX } from "react-icons/lu";
 interface VideoPlayerProps {
-  url: string;
-  poster: string;
+  id: string;
+  filename_download: string;
   title: string;
 }
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
-  url,
-  poster,
+  id,
+  filename_download,
   title,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -45,11 +46,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       <video
         ref={videoRef}
         className="aspect-video w-full rounded-lg object-cover"
-        poster={poster}
+        // poster={poster}
         preload="metadata"
       >
         <source
-          src={url}
+          src={`${URL_IMAGE}/${id}/${filename_download}`}
           type="video/mp4"
         />
         Your browser does not support the video tag.

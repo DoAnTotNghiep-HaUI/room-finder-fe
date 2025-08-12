@@ -1,39 +1,35 @@
 import { IConversation } from "@/types/chat";
 import { IUser } from "@/types/user";
 import directus from "@/utils/directus";
-import { createItem, readItem, readItems } from "@directus/sdk";
+import { createItem, readItem, readItems, updateItem } from "@directus/sdk";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { AppState } from "..";
+import { openTempConversation, setConversationId } from "./store";
+import { getConversationById } from "../conversation-detail/action";
 
 export const checkConversationExists = createAsyncThunk(
   "conversation/checkConversationExists",
   async ({ userId1, userId2 }: { userId1: string; userId2: string }) => {
     try {
-      const response: any = await directus.request(
+      const response = await directus.request(
         readItems("conversation", {
-          fields: ["*", "participants.*"],
+          fields: ["*", "participants.directus_users_id.id"],
           filter: {
             participants: {
-              directus_users_id: {
-                _eq: userId1,
-              },
+              _and: [
+                { directus_users_id: { _eq: userId1 } },
+                { directus_users_id: { _eq: userId2 } },
+              ],
             },
           },
+          limit: 1,
         })
       );
 
-      const conversations = response.filter((conv: any) => {
-        const participantIds = conv.participants.map(
-          (p: any) => p.directus_users_id
-        );
-        return (
-          participantIds.includes(userId1) && participantIds.includes(userId2)
-        );
-      });
-
-      return conversations;
+      return response;
     } catch (error) {
-      //   return rejectWithValue(error);
-      console.log("error", error);
+      console.error("Error checking conversation:", error);
+      throw error;
     }
   }
 );
@@ -103,15 +99,55 @@ export const getListConversationByUserId = createAsyncThunk(
 //     }
 //   }
 // );
-export const createConvrstion = createAsyncThunk(
-  "conversation/createConverstion",
-  async (data: IConversation) => {
+export const createConversation = createAsyncThunk(
+  "conversation/createConversation",
+  async (data: any) => {
     try {
       const res = await directus.request(createItem("conversation", data));
       return res;
     } catch (error) {
       //   return rejectWithValue(error);
       console.log("error", error);
+    }
+  }
+);
+export const updateConversation = createAsyncThunk(
+  "conversation/updateConversation",
+  async (conversationId: string, data: any) => {
+    try {
+      const res = await directus.request(
+        updateItem("conversation", conversationId, data)
+      );
+      return res;
+    } catch (error) {
+      //   return rejectWithValue(error);
+      console.log("error", error);
+    }
+  }
+);
+export const openChatWithUser = createAsyncThunk(
+  "conversation/openChatWithUser",
+  async (partnerId: string, { getState, dispatch }) => {
+    const state = getState() as AppState;
+    const { conversations } = state.conversation;
+    if (state.conversation.conversations.length === 0) {
+      await dispatch(getListConversationByUserId(state.auth.userInfo?.id!));
+    }
+
+    // Tìm conversation đã tồn tại
+    const existingConv = conversations.find((conv) =>
+      conv.participants.some((p) => p.directus_users_id?.id === partnerId)
+    );
+    console.log("existingConv", existingConv);
+
+    if (existingConv) {
+      // Nếu đã có conversation, mở luôn cửa sổ chat với conversation đó
+      dispatch(setConversationId(existingConv?.id));
+      return { isTemp: false, conversationId: existingConv.id };
+    } else {
+      // Nếu chưa có, mở temp chat window
+      dispatch(openTempConversation(partnerId));
+      return { isTemp: true };
     }
   }
 );

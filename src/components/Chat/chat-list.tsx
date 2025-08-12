@@ -39,6 +39,12 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
   useEffect(() => {
     dispatchAction(getListConversationByUserId(userInfo?.id));
   }, [userInfo?.id]);
+  const formatLastMessageTime = (dateStr?: string) => {
+    if (!dateStr) return "Không rõ thời gian";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "Không rõ thời gian";
+    return formatDistanceToNow(date, { addSuffix: false });
+  };
   return (
     <div className="flex h-full max-h-[400px] flex-col">
       <div className="border-b border-gray-200 p-3 dark:border-gray-700">
@@ -73,14 +79,17 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
           const lastMessage = conversation?.last_message;
           const partner = getConversationPartner(conversation);
           console.log("partner", partner);
-
+          console.log(
+            "formatDateTime",
+            formatLastMessageTime(String(conversation.date_created))
+          );
+          console.log("lastmessagetime", conversation.date_created);
           if (!lastMessage) return null;
-
           return (
             <div
-              key={conversation.id}
+              key={conversation?.id}
               className="flex cursor-pointer items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700"
-              onClick={() => handleSelectConversation(conversation.id)}
+              onClick={() => handleSelectConversation(conversation?.id)}
             >
               <div className="relative">
                 <img
@@ -109,9 +118,9 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
                     {partner?.directus_users_id?.last_name}
                   </p>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatDistanceToNow(new Date(lastMessage.date_created), {
-                      addSuffix: false,
-                    })}
+                    {formatLastMessageTime(
+                      String(conversation?.last_message_time)
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center">

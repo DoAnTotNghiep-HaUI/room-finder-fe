@@ -9,15 +9,11 @@ import { IFile } from "@/types/file";
 import { URL_IMAGE } from "@/constants";
 interface MediaGalleryProps {
   images: any;
-  videos: Array<{
-    url: string;
-    poster: string;
-    title: string;
-  }>;
+  video: IFile;
 }
 export const MediaGallery: React.FC<MediaGalleryProps> = ({
   images,
-  videos,
+  video,
 }) => {
   const [activeTab, setActiveTab] = useState<"images" | "videos">("images");
   const OPTIONS: EmblaOptionsType = {};
@@ -25,18 +21,10 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
   console.log("images", images);
 
   const imgThumbs = images?.map(
-    (img) =>
-      `${URL_IMAGE}/${
-        img?.directus_files_id?.id
-      }/${img?.directus_files_id?.filename_download}`
+    (img) => `${URL_IMAGE}/${img?.id}/${img?.filename_download}`
   );
   console.log("slides", imgThumbs);
 
-  // const imgThumbs = [
-  //   "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-  //   "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6",
-  //   "https://images.unsplash.com/photo-1484101403633-562f891dc89a",
-  // ];
   return (
     <div className="space-y-4">
       {/* Tab Navigation */}
@@ -53,7 +41,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
           className={`flex items-center gap-2 border-b-2 px-4 py-2 transition-colors ${activeTab === "videos" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
         >
           <BiVideo className="h-5 w-5" />
-          Video ({videos.length})
+          Video
         </button>
       </div>
       {/* Media Content */}
@@ -65,12 +53,11 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
           />
         ) : (
           <div className="space-y-4">
-            {videos.map((video, index) => (
-              <VideoPlayer
-                key={index}
-                {...video}
-              />
-            ))}
+            <VideoPlayer
+              id={video?.id}
+              filename_download={video?.filename_download}
+              title={video?.title}
+            />
           </div>
         )}
       </div>

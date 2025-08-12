@@ -6,18 +6,31 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "./file-upload";
-import { HiPaperClip } from "react-icons/hi";
 import { FaFileImage } from "react-icons/fa";
 import { FaFileCirclePlus } from "react-icons/fa6";
-import { IFile } from "@/types/file";
 interface FileUploadDropzoneProps {
   children: React.ReactNode;
+  onFilesChange: (files: File[]) => void;
+  files: File[];
 }
-const FileUploadDropzone = ({ children }: FileUploadDropzoneProps) => {
-  const [files, setFiles] = useState<File[] | null>([]);
+const FileUploadDropzone = ({
+  children,
+  onFilesChange,
+  files,
+}: FileUploadDropzoneProps) => {
+  const [uploadedFiles, setUploadedFiles] = useState<File[] | null>(files);
   const dropzone = {
     accept: {
-      "image/*": [".jpg", ".jpeg", ".png"],
+      "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp"],
+      "video/*": [".mp4", ".mov", ".avi", ".mkv"],
+      "application/pdf": [".pdf"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+      "application/vnd.ms-excel": [".xls"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
     },
     multiple: true,
     maxFiles: 5,
@@ -31,7 +44,7 @@ const FileUploadDropzone = ({ children }: FileUploadDropzoneProps) => {
       <FileUploader
         value={files}
         orientation="vertical"
-        onValueChange={setFiles}
+        onValueChange={onFilesChange}
         className="w-fit pr-3"
         dropzoneOptions={dropzone}
       >

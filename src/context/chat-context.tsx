@@ -17,8 +17,9 @@ import type {
 } from "../types/chat";
 import { initialChatState } from "../utils/mock-data";
 import { IUser } from "@/types/user";
-import { useSelector } from "react-redux";
-import { AppState } from "@/redux";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, AppState } from "@/redux";
+import { initializeSocketConnection } from "@/redux/chat/action";
 
 type ChatAction =
   | { type: "SET_ACTIVE_CONVERSATION"; conversationId: string }
@@ -43,7 +44,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   const { messageList } = useSelector((state: AppState) => state.message);
   const { userInfo } = useSelector((state: AppState) => state.auth);
   const [chatWindows, setChatWindows] = useState<ChatWindowState[]>([]);
-
+  const dispatchAction = useDispatch<AppDispatch>();
+  useEffect(() => {
+    if (userInfo?.id) {
+      dispatchAction(initializeSocketConnection(userInfo?.id));
+    }
+  }, [userInfo?.id]);
   const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
     switch (action.type) {
       case "SET_ACTIVE_CONVERSATION": {
@@ -175,7 +181,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   // Helper function to get the other participant in a conversation
   const getConversationPartner = (conversation: IConversation) => {
     return conversation.participants.find(
-      (participant) => participant.id !== userInfo?.id
+      (participant) => participant.directus_users_id?.id !== userInfo?.id
     ) as any;
   };
 
@@ -187,7 +193,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
   const openChatWindow = useCallback(
-    async (conversationId: number, ownerId: string) => {
+    async (conversationId: number) => {
       // Check if chat window is already open
       const existingWindow = chatWindows.find(
         (window) => window.conversationId === conversationId
@@ -253,7 +259,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => clearTimeout(timer);
   }, []);
+  // useEffect(() => {
+  //   if (userInfo?.id) {
+  //     const socket = initializeSocket(userInfo.id);
 
+  //     // Lắng nghe tin nhắn mới
+  //     socket.on("newMessage", (message: Message) => {
+  //       dispatch({ type: "RECEIVE_MESSAGE", payload: message });
+  //     });
+
+  //     // Lắng nghe trạng thái typing
+  //     socket.on(
+  //       "userTyping",
+  //       (data: { conversationId: string; userId: string }) => {
+  //         dispatch({ type: "SET_TYPING", ...data });
+  //       }
+  //     );
+
+  //     return () => {
+  //       socket.off("newMessage");
+  //       socket.off("userTyping");
+  //       disconnectSocket();
+  //     };
+  //   }
+  // }, [userInfo?.id]);
   return (
     <ChatContext.Provider
       value={{

@@ -1,3 +1,4 @@
+import { IFile } from "./file";
 import { IUser } from "./user";
 
 export interface IMessage {
@@ -5,8 +6,8 @@ export interface IMessage {
   sender: string;
   receiver: string;
   content: string;
-  type: "text" | "image" | "link";
-  timestamp: Date;
+  attachments?: IFile[];
+  type: "text" | "file" | "link";
   reactions?: string[];
   status: "sent" | "delivered" | "read";
   conversation: string;
