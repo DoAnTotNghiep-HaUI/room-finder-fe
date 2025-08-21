@@ -1,4 +1,4 @@
-import { RoomDetailParams } from "@/types/room";
+import { IRoom, RoomDetailParams } from "@/types/room";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 import { getRoomDetail } from "./action";
@@ -9,11 +9,11 @@ const initialState: RoomDetailParams = {
   roomDetail: null,
 };
 
-const roomSlice = createSlice({
-  name: "room",
+const roomDetailSlice = createSlice({
+  name: "roomDetail",
   initialState,
   reducers: {
-    setRoomDetail: (state, action: PayloadAction<any>) => {
+    setRoomDetail: (state, action: PayloadAction<IRoom>) => {
       state.roomDetail = action.payload;
     },
   },
@@ -32,6 +32,6 @@ const roomSlice = createSlice({
       });
   },
 });
-export const { setRoomDetail } = roomSlice.actions;
+export const { setRoomDetail } = roomDetailSlice.actions;
 
-export default roomSlice.reducer;
+export default roomDetailSlice.reducer;

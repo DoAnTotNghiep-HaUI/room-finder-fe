@@ -21,114 +21,21 @@ import { RoomCard } from "@/components/Card/room-card";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, AppState } from "@/redux";
-import { getListRoom } from "@/redux/room/action";
+import {
+  getListRoom,
+  getRoomCheapPrice,
+  getRoomNewPost,
+} from "@/redux/room/action";
+import RoomMap from "@/test/RoomMap";
+import { getListRoomType } from "@/redux/room-type/action";
+import { IRoomType } from "@/types/room";
+import { BiChevronDown, BiMapPin } from "react-icons/bi";
+import Input from "@/components/Input/input";
+import { getListDistrict } from "@/redux/districts/action";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import { getListBlog } from "@/redux/blog/action";
+import { IBlog } from "@/types/blog";
 
-const sampleRooms = [
-  {
-    id: "1",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "2",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "3",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "4",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "5",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-  {
-    id: "6",
-    title: "Modern Studio Apartment Near Downtown",
-    price: 1200,
-    size: 35,
-    capacity: 2,
-    location: "123 Main Street, New York, NY 10001",
-    building: "The Metropolitan Tower",
-    type: "Studio Apartment",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    postedDate: "2 days ago",
-    isVerified: true,
-  },
-];
-const TAB_MENU = [
-  {
-    title: "Tab 1",
-    value: "tab1",
-  },
-  {
-    title: "Tab 2",
-    value: "tab2",
-  },
-  {
-    title: "Tab 3",
-    value: "tab3",
-  },
-  {
-    title: "Tab 4",
-    value: "tab4",
-  },
-  {
-    title: "Tab 5",
-    value: "tab5",
-  },
-  {
-    title: "Tab 6",
-    value: "tab6",
-  },
-];
 const blogPosts = [
   {
     id: "1",
@@ -147,60 +54,72 @@ const blogPosts = [
     tags: ["First-time renters", "Tips", "Housing"],
   },
 ];
+const cities = [
+  { name: "Hà Nội", value: "hanoi" },
+  { name: "Đà Nẵng", value: "danang" },
+  { name: "Hồ Chí Minh", value: "hochiminh" },
+];
 function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { roomList } = useSelector((state: AppState) => state.room);
-  const [assignedTo, setAssignedTo] = useState<string | number>("");
+  const { roomList, roomNewPost, roomCheapPrice } = useSelector(
+    (state: AppState) => state.room
+  );
+  const { search } = useLocation();
+  const roomTypeId = new URLSearchParams(search).get("roomType") || "";
+  const { roomTypeList } = useSelector((state: AppState) => state.roomType);
+  const { blogList } = useSelector((state: AppState) => state.blog);
 
+  const { districtList } = useSelector((state: AppState) => state.districts);
+  const [currentPosition, setCurrentPosition] = useState(null);
+  const [assignedTo, setAssignedTo] = useState<string | number>("");
+  const [selectedCity, setSelectedCity] = useState("Đà Nẵng");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const listRoomCard = useInViewEffect();
   const location = useInViewEffect();
   const topRoomCard = useInViewEffect();
   const blogCard = useInViewEffect();
   const totalPagesBlog = 10;
   const [currentPageBlog, setCurrentPageBlog] = useState(1);
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`Assigned to: ${assignedTo}`);
-  };
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [isScrolled, setIsScrolled] = useState(false);
+  // navigator.geolocation.getCurrentPosition(async (position) => {
+  //   console.log("Latitude:", position.coords.latitude);
+  //   console.log("Longitude:", position.coords.longitude);
+  //   const url = `https://nominatim.openstreetmap.org/reverse?lat=${21.064689100271035}&lon=${105.70300471685805}&format=json`;
 
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     if (scrollRef.current) {
-  //       setIsScrolled(scrollRef.current.scrollLeft > 0);
-  //     }
-  //   };
+  //   const res = await fetch(url);
+  //   const data = await res.json();
+  //   // console.log(data.address);
 
-  //   scrollRef.current?.addEventListener("scroll", handleScroll);
-  //   return () => {
-  //     scrollRef.current?.removeEventListener("scroll", handleScroll);
-  //   };
-  // }, []);
-  // const socket = io("ws://localhost:8055", {
-  //   path: "/chat/socket",
+  //   setCurrentPosition(data.display_name);
   // });
+  // const roomPropose = () => {
+  //   const response = roomList?.filter((room) => room?.building.district === currentPosition?.)
+  // }
 
-  // // Join conversation room
-  // socket.emit("join", 5); // room theo conversation_id
-
-  // // Gửi tin nhắn
-  // socket.emit("send_message", {
-  //   conversation: 5,
-  //   receiver: "9c600637-f106-494c-9c22-2ef90f419873",
-  //   sender: "2d77e67f-913b-45c8-91b0-ec8d711445f6",
-  //   content: "Alo",
-  //   type: "text",
-  // });
-
-  // // Lắng nghe tin nhắn mới
-  // socket.on("new_message", (msg) => {
-  //   console.log("New message:", msg);
-  // });
+  const TAB_MENU = roomTypeList?.map((type: IRoomType) => ({
+    title: type?.name,
+    value: type?.id,
+  }));
   useEffect(() => {
     dispatch(getListRoom());
+    dispatch(getListRoomType());
+    dispatch(getListDistrict());
+    dispatch(getRoomCheapPrice());
+    dispatch(getListBlog());
   }, []);
-  console.log("roomLisst", roomList);
+  useEffect(() => {
+    if (roomTypeId) {
+      dispatch(getRoomNewPost(roomTypeId));
+    } else {
+      if (roomTypeList?.length > 0)
+        dispatch(getRoomNewPost(roomTypeList[0]?.id));
+    }
+  }, [roomTypeList, roomTypeId]);
+
+  const roomType = roomTypeList?.map((rt: IRoomType) => ({
+    value: rt.id,
+    label: rt.name,
+  }));
+  const top3NewBlog = blogList?.slice(0, 3);
 
   return (
     <>
@@ -225,46 +144,66 @@ function HomePage() {
               tìm không gian sống phù hợp với bạn!
             </p>
           </div>
-          <div className="bg-contrastText sm:rounded-md md:w-[600px] lg:mx-auto lg:w-auto lg:rounded-full lg:p-4">
-            <form>
+          <div className="mx-auto bg-contrastText sm:rounded-md md:w-[600px] lg:w-[1400px] lg:rounded-full lg:p-4">
+            <form onSubmit={(e) => e.preventDefault()}>
               <div className="space-y-4 lg:flex lg:items-center lg:justify-between lg:gap-1 lg:space-y-0">
-                <div className="sm:auto grid grid-cols-1 gap-3 px-3 lg:w-2/3 lg:grid-cols-3 lg:divide-x">
-                  <div className="w-full py-3 pl-3">
+                <div className="flex-cols w-full gap-3 px-3 lg:flex lg:divide-x">
+                  <div className="w-full py-3 pl-3 lg:w-1/3">
                     <Select
                       label="Loại phòng"
                       placeholder="Tất cả"
-                      options={[
-                        { value: "wade", label: "Wade Cooper" },
-                        { value: "arlene", label: "Arlene Mccoy" },
-                        { value: "devon", label: "Devon Webb" },
-                        { value: "tom", label: "Tom Cook" },
-                        { value: "tanya", label: "Tanya Fox" },
-                      ]}
+                      options={roomType}
                       value={assignedTo}
                       onChange={(value) => setAssignedTo(value)}
                     />
                   </div>
-                  <div className="w-full py-3 pl-5 pr-3">
-                    <InputSearch
-                      label="Địa chỉ"
-                      placeholder="Tìm kiếm theo địa chỉ"
-                      value={assignedTo}
-                      onChange={(value) => setAssignedTo(value)}
-                      icon={<FaLocationCrosshairs />}
-                    />
-                  </div>
-                  <div className="w-full py-3 pl-5 pr-3">
-                    <InputSearch
-                      label="Từ khoá"
-                      placeholder="Tìm kiếm theo từ khoá"
-                      value={assignedTo}
-                      onChange={(value) => setAssignedTo(value)}
-                      icon={<IoKeyOutline />}
-                    />
+                  <div className="w-full py-3 pl-5 pr-3 lg:w-2/3">
+                    <div className="lg:w-4xl mx-auto flex items-center gap-2 rounded-full border border-[#1E88E5] border-primary bg-gray-50 p-2">
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsDropdownOpen(!isDropdownOpen);
+                          }}
+                          className="flex items-center gap-2 rounded-full border border-[#1E88E5]/20 bg-[#1E88E5]/10 px-4 py-2 text-[#1E88E5] transition-colors duration-200 hover:bg-[#1E88E5]/20 focus:outline-none focus:ring-2 focus:ring-[#1E88E5]/30"
+                        >
+                          <BiMapPin className="h-4 w-4 text-[#1E88E5]" />
+                          <span className="font-medium">{selectedCity}</span>
+                          <BiChevronDown
+                            className={`h-4 w-4 text-[#1E88E5] transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+                          />
+                        </button>
+
+                        {isDropdownOpen && (
+                          <div className="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-gray-200 bg-white shadow-lg">
+                            {cities.map((city) => (
+                              <button
+                                key={city.value}
+                                onClick={() => {
+                                  setSelectedCity(city.name);
+                                  setIsDropdownOpen(false);
+                                }}
+                                className="w-full px-4 py-2 text-left transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-[#1E88E5]/10 focus:bg-[#1E88E5]/10 focus:outline-none"
+                              >
+                                {city.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Search Input - already using pure Tailwind */}
+                      <div className="relative flex-1">
+                        <Input
+                          className="w-2xl border-0"
+                          placeholder="Tìm kiếm theo quận, tên đường,.."
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center gap-4 sm:px-4 lg:w-1/3 lg:flex-row lg:px-2">
+                <div className="flex flex-col items-center justify-center gap-4 sm:px-4 lg:flex-row lg:px-2">
                   <div className="sm:w-full lg:w-1/2">
                     <ModalSearch />
                   </div>
@@ -275,6 +214,7 @@ function HomePage() {
                       variant="primary"
                       icon={<IoIosSearch />}
                       className="w-full rounded-full lg:w-auto"
+                      type="submit"
                     />
                   </div>
                 </div>
@@ -285,16 +225,20 @@ function HomePage() {
       </div>
       <div className="mx-auto py-[64px]">
         <div className="pb-6">
-          <p className="pb-2 text-center text-lg text-primary">PHÒNG NỔI BẬT</p>
+          <p className="pb-2 text-center text-lg text-primary">
+            PHÒNG MỚI ĐĂNG
+          </p>
           <p className="text-center text-4xl">Đề Xuất Cho Bạn</p>
         </div>
         <div className="flex justify-center sm:px-4 lg:px-8">
-          <Tabs
-            tabs={TAB_MENU}
-            url="/home"
-            activeTabClassName="bg-[#1E88E5]"
-            tabClassName="px-6 bg-gray-300 mx-2"
-          />
+          {TAB_MENU && TAB_MENU.length > 0 && (
+            <Tabs
+              tabs={TAB_MENU}
+              url="/home"
+              activeTabClassName="bg-[#1E88E5]"
+              tabClassName="px-6 bg-gray-300 mx-2"
+            />
+          )}
         </div>
 
         <div
@@ -302,7 +246,7 @@ function HomePage() {
           className="mx-auto grid gap-4 sm:max-w-[100%] sm:grid-cols-1 sm:px-4 md:grid-cols-2 sm:lg:grid-cols-3 lg:max-w-[70%] lg:grid-cols-3 lg:px-8"
         >
           {/* {[...Array(6).keys()].map((i) => ( */}
-          {roomList?.map((room, i) => (
+          {roomNewPost?.map((room, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -321,7 +265,6 @@ function HomePage() {
           ))}
           {/* ))} */}
         </div>
-
         <div className="flex justify-center p-8">
           <Button
             variant="primary"
@@ -332,15 +275,18 @@ function HomePage() {
         </div>
         <div
           ref={location.ref}
-          className="w-full sm:px-4 lg:px-8"
+          className="mt-4 w-full sm:px-4 lg:px-8"
         >
+          <p className="pb-4 text-center text-2xl font-semibold text-primary">
+            KHÁM PHÁ
+          </p>
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={location.isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.75, ease: "easeIn", delay: 0.25 }}
             // className="w-full"
           >
-            <LocationCard />
+            <LocationCard districtData={districtList} />
           </motion.div>
         </div>
         <div className="flex flex-col items-center justify-center py-[64px]">
@@ -359,22 +305,20 @@ function HomePage() {
         <SectionBenifit />
 
         <div className="pb-6">
-          <p className="pb-2 text-center text-lg text-primary">
-            PHÒNG HÀNG ĐẦU
-          </p>
-          <p className="text-center text-4xl">Căn Phòng Tốt Nhất</p>
+          <p className="pb-2 text-center text-lg text-primary">PHÒNG GIÁ RẺ</p>
+          <p className="text-center text-4xl">Phù hợp với tất cả mọi người</p>
         </div>
 
         <div
           ref={topRoomCard.ref}
-          className="mx-auto grid gap-4 sm:max-w-[100%] sm:grid-cols-1 sm:px-4 md:grid-cols-2 sm:lg:grid-cols-3 lg:max-w-[70%] lg:grid-cols-3 lg:px-8"
+          className="mx-auto grid h-full gap-4 sm:max-w-[100%] sm:grid-cols-1 sm:px-4 md:grid-cols-2 sm:lg:grid-cols-3 lg:max-w-[70%] lg:grid-cols-3 lg:px-8"
         >
-          {roomList?.map((room, i) => (
+          {roomCheapPrice?.map((room, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={
-                listRoomCard.isInView ? { opacity: 1, scale: 1, y: 0 } : {}
+                topRoomCard.isInView ? { opacity: 1, scale: 1, y: 0 } : {}
               }
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
@@ -399,7 +343,7 @@ function HomePage() {
         <SectionTestimonials />
         <div
           ref={blogCard.ref}
-          className="flex flex-col items-center justify-center py-[64px]"
+          className="=flex flex-col items-center justify-center py-[64px]"
         >
           <div className="pb-6">
             <p className="pb-2 text-center text-lg text-primary">
@@ -408,29 +352,12 @@ function HomePage() {
             <p className="text-center text-4xl">Từ bài viết của chúng tôi</p>
           </div>
           <motion.div
-            className="grid grid-cols-1 gap-6 md:grid-cols-2"
+            className="mx-auto grid h-full grid-cols-1 gap-4 gap-6 sm:max-w-[100%] sm:grid-cols-1 sm:px-4 md:grid-cols-2 sm:lg:grid-cols-3 lg:max-w-[70%] lg:grid-cols-3 lg:px-8"
             initial={{ opacity: 0, y: 50 }}
             animate={blogCard.isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.75, delay: 0.25, ease: "linear" }}
           >
-            {/* {[...Array(3).keys()].map((i) => (
-              <BlogCard
-                img="https://images.unsplash.com/photo-1565759732117-a48f0bedbbfd?q=80&w=1000&auto=format&fit=crop"
-                blogCategory="Furniture"
-                author="ViDucThien"
-                createdDate="November 11, 2003"
-                description=" Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cum,
-            aliquid rerum tempora est nulla, facere error asperiores, voluptate
-            saepe soluta dolores culpa fuga itaque. Provident quam quidem
-            officia labore ullam?"
-                title="Learn why UI/UX Important and How Implement well in your site."
-                key={i}
-              />
-           
-
-            ))} */}
-
-            {blogPosts.map((post) => (
+            {top3NewBlog?.map((post: IBlog) => (
               <BlogCard
                 key={post.id}
                 post={post}
@@ -439,19 +366,19 @@ function HomePage() {
             ))}
 
             {/* Pagination */}
-            <Pagination
+            {/* <Pagination
               className="mt-8"
               currentPage={currentPageBlog}
               totalPages={10}
               onPageChange={setCurrentPageBlog}
-            />
+            /> */}
           </motion.div>
-          <PaginationCustom
+          {/* <PaginationCustom
             totalPages={totalPagesBlog}
             currentPage={currentPageBlog}
             onPageChange={(page) => setCurrentPageBlog(page)}
             className="mt-4"
-          />
+          /> */}
         </div>
       </div>
     </>

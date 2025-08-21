@@ -152,7 +152,7 @@ export const RoomDetail = () => {
                 <h1 className="mb-4 text-2xl font-semibold text-gray-900">
                   {roomDetail?.title}
                 </h1>
-                <RoomInfo roomData={roomData} />
+                <RoomInfo roomData={roomDetail} />
               </div>
               <div className="rounded-lg bg-white p-6 shadow-sm">
                 <h2 className="mb-4 text-xl font-semibold text-gray-900">
@@ -167,7 +167,8 @@ export const RoomDetail = () => {
             <div className="lg:col-span-1">
               <div className="sticky top-8 space-y-6">
                 <div className="rounded-lg bg-white p-6 shadow-sm">
-                  <div className="mb-2 text-3xl font-bold text-gray-900">
+                  <p className="text-xl text-gray-800">Giá phòng</p>
+                  <div className="mb-2 text-3xl font-bold text-gray-900 text-primary">
                     {roomDetail?.room_price.toLocaleString("vi-VN")} Đ
                     <span className="text-lg font-normal text-gray-500">
                       /Tháng
@@ -181,10 +182,10 @@ export const RoomDetail = () => {
                       <BiCalendar className="h-5 w-5" />
                       Đặt lịch xem phòng
                     </button>
-                    <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700">
+                    {/* <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700">
                       <BiPhone className="h-5 w-5" />
                       Gọi cho chủ phòng
-                    </button>
+                    </button> */}
                     <button
                       onClick={handleChatWithOwner}
                       className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"

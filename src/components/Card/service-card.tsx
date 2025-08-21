@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FaArrowRight, FaHeart } from "react-icons/fa6";
 import Button from "../Button/button";
+import { useNavigate } from "react-router-dom";
 export default function ServiceCard() {
+  const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
 
   const handleClick = () => {
@@ -22,12 +24,14 @@ export default function ServiceCard() {
           </div>
           <article className="space-y-2 p-2 pb-3 text-black">
             <div className="flex flex-col items-center justify-center space-y-6 pt-6">
-              <p className="text-2xl font-medium">Buy A New Home</p>
+              <p className="text-2xl font-medium">Tìm phòng trọ dễ dàng</p>
               <span className="text-center">
-                Discover your dream home effortlessly. Explore diverse
-                properties and expert guidance for a seamless buying experience.
+                Khám phá hàng trăm phòng trọ phù hợp cho sinh viên và người lao
+                động. Giá cả minh bạch, đầy đủ thông tin để bạn nhanh chóng chọn
+                được chỗ ở ưng ý.
               </span>
               <Button
+                onClick={() => navigate("/find-rental")}
                 variant="outline"
                 content="Tìm Hiểu Thêm"
                 className="rounded-full group-hover:bg-primary group-hover:px-8 group-hover:text-white"
@@ -48,12 +52,13 @@ export default function ServiceCard() {
           </div>
           <article className="space-y-2 p-2 pb-3 text-black">
             <div className="flex flex-col items-center justify-center space-y-6 pt-6">
-              <p className="text-2xl font-medium">Sell a home</p>
+              <p className="text-2xl font-medium">Đăng tin cho thuê phòng</p>
               <span className="text-center">
-                Sell confidently with expert guidance and effective strategies,
-                showcasing your property's best features for a successful sale.
+                Chủ trọ dễ dàng đăng tin cho thuê, quản lý phòng trọ của mình
+                nhanh chóng và tiếp cận được nhiều người thuê hơn.
               </span>
               <Button
+                onClick={() => navigate("/find-rental")}
                 variant="outline"
                 content="Tìm Hiểu Thêm"
                 className="rounded-full group-hover:bg-primary group-hover:px-8 group-hover:text-white"
@@ -74,13 +79,16 @@ export default function ServiceCard() {
           </div>
           <article className="space-y-2 p-2 pb-3 text-black">
             <div className="flex flex-col items-center justify-center space-y-6 pt-6">
-              <p className="text-2xl font-medium">Rent a home</p>
+              <p className="text-2xl font-medium">
+                Thuê phòng an toàn – nhanh chóng
+              </p>
               <span className="text-center">
-                Discover your perfect rental effortlessly. Explore a diverse
-                variety of listings tailored precisely to suit your unique
-                lifestyle needs.
+                Kết nối trực tiếp với chủ nhà, không qua trung gian. Đặt lịch
+                xem phòng, thương lượng giá và hoàn tất thuê phòng một cách tiện
+                lợi, rõ ràng.
               </span>
               <Button
+                onClick={() => navigate("/find-rental")}
                 variant="outline"
                 content="Tìm Hiểu Thêm"
                 className="rounded-full group-hover:bg-primary group-hover:px-8 group-hover:text-white"

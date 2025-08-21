@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiFilter } from "react-icons/bi";
 import { SearchFilters } from "./search-filter";
 
@@ -9,15 +9,21 @@ import { ViewToggle } from "@/page/Blog/view-toggle";
 import { ActiveFilters } from "./active-filter";
 import Select from "@/components/Input/selectAi";
 import { SortOptionRoom, ViewMode } from "@/constants";
-import { useSelector } from "react-redux";
-import { AppState } from "@/redux";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, AppState } from "@/redux";
+import { getListRoom } from "@/redux/room/action";
 
 const FindRental = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const { roomList } = useSelector((state: AppState) => state.room);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOptionRoom>("latest");
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  console.log("roomList", roomList);
+  useEffect(() => {
+    dispatch(getListRoom());
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile Filter Toggle */}
@@ -30,75 +36,73 @@ const FindRental = () => {
           Show Filters
         </button>
       </div>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-8 md:flex-row">
-          {/* Filters Sidebar */}
-          <aside
-            className={`fixed left-0 top-0 z-40 h-full flex-shrink-0 transform transition-transform duration-300 md:sticky md:h-auto md:w-80 md:transform-none ${isMobileFiltersOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} `}
-          >
-            <SearchFilters onClose={() => setIsMobileFiltersOpen(false)} />
-          </aside>
-          {/* Main Content */}
-          <main className="flex-1">
-            {/* Controls Bar */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-4">
-                <ViewToggle
-                  current={viewMode}
-                  onChange={setViewMode}
-                />
-                <Select
-                  options={[
-                    { value: "latest", label: "Latest" },
-                    { value: "lowprice", label: "Low Price" },
-                    { value: "highprice", label: "High Price" },
-                    { value: "mostpopular", label: "Most Popular" },
-                  ]}
-                  onChange={(value: string) =>
-                    setSortBy(value as SortOptionRoom)
-                  }
-                  value={sortBy}
-                />
-              </div>
+      <div className="grid grid-cols-12 gap-[2rem] sm:px-[10rem] sm:py-[2rem]">
+        {/* <div className="flex flex-col gap-8 md:flex-row"> */}
+        {/* Filters Sidebar */}
+        <aside
+          className={`fixed left-0 top-0 z-40 hidden h-full flex-shrink-0 transform transition-transform duration-300 sm:col-span-4 sm:block md:sticky md:h-auto md:transform-none ${isMobileFiltersOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} `}
+        >
+          <SearchFilters onClose={() => setIsMobileFiltersOpen(false)} />
+        </aside>
+        {/* Main Content */}
+        <main className="col-span-12 flex-1 sm:col-span-8">
+          {/* Controls Bar */}
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <ViewToggle
+                current={viewMode}
+                onChange={setViewMode}
+              />
               <Select
                 options={[
-                  { value: 5, label: "5 per page" },
-                  { value: 10, label: "10 per page" },
-                  { value: 15, label: "15 per page" },
+                  { value: "latest", label: "Latest" },
+                  { value: "lowprice", label: "Low Price" },
+                  { value: "highprice", label: "High Price" },
+                  { value: "mostpopular", label: "Most Popular" },
                 ]}
-                onChange={(value: number) => setItemsPerPage(value)}
-                value={itemsPerPage}
+                onChange={(value: string) => setSortBy(value as SortOptionRoom)}
+                value={sortBy}
               />
             </div>
-            {/* Active Filters */}
-            <div className="mb-4">
-              <ActiveFilters />
-            </div>
-            {/* Room Grid/List */}
-            <div
-              className={
-                viewMode === "grid"
-                  ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-                  : "space-y-6"
-              }
-            >
-              {roomList?.map((room) => (
-                <RoomCard
-                  key={room.id}
-                  room={room}
-                  layout={viewMode === "grid" ? "vertical" : "horizontal"}
-                />
-              ))}
-            </div>
-            {/* Pagination */}
-            <Pagination
-              className="mt-8"
-              currentPage={1}
-              totalPages={10}
-              onPageChange={(page) => console.log("Page changed:", page)}
+            <Select
+              options={[
+                { value: 5, label: "5 per page" },
+                { value: 10, label: "10 per page" },
+                { value: 15, label: "15 per page" },
+              ]}
+              onChange={(value: number) => setItemsPerPage(value)}
+              value={itemsPerPage}
             />
-          </main>
-        </div>
+          </div>
+          {/* Active Filters */}
+          <div className="mb-4">
+            <ActiveFilters />
+          </div>
+          {/* Room Grid/List */}
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                : "space-y-6"
+            }
+          >
+            {roomList?.map((room) => (
+              <RoomCard
+                key={room.id}
+                room={room}
+                layout={viewMode === "grid" ? "vertical" : "horizontal"}
+              />
+            ))}
+          </div>
+          {/* Pagination */}
+          <Pagination
+            className="mt-8"
+            currentPage={1}
+            totalPages={10}
+            onPageChange={(page) => console.log("Page changed:", page)}
+          />
+        </main>
+        {/* </div> */}
       </div>
     </div>
   );

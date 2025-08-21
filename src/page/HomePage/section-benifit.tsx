@@ -10,16 +10,16 @@ const features = [
   {
     id: 1,
     icon: <RiVerifiedBadgeLine size={50} />,
-    title: "Chuyên môn được chứng minh",
+    title: "Nhiều lựa chọn phù hợp",
     description:
-      "Đội ngũ dày dạn của chúng tôi vượt trội trong bất động sản với nhiều năm điều hướng thị trường thành công, đưa ra các quyết định sáng suốt và kết quả tối ưu.",
+      "Hàng trăm phòng trọ, ký túc xá và nhà trọ giá rẻ được cập nhật thường xuyên. Bạn dễ dàng tìm được chỗ ở đúng nhu cầu và khả năng tài chính.",
   },
   {
     id: 2,
     icon: <LiaBusinessTimeSolid size={50} />,
     title: "Tiết kiệm thời gian của bạn",
     description:
-      "Chúng tôi sẽ giúp bạn tìm kiếm được căn phòng ưng ý, ngay cả khi bạn không có thời gian trực tiếp đi xem.",
+      "Chỉ vài thao tác tìm kiếm là bạn đã có ngay danh sách phòng trọ phù hợp, không cần phải đi xem nhiều nơi tốn công sức.",
   },
   {
     id: 3,
@@ -62,10 +62,10 @@ export default function SectionBenifit() {
           <p className="sm:text-2xl lg:text-4xl">
             Tại sao lại chọn RoomFinder?
           </p>
-          <span className="pt-6 text-gray-500 sm:text-sm lg:text-lg">
+          {/* <span className="pt-6 text-gray-500 sm:text-sm lg:text-lg">
             Our seasoned team excels in real estate with years of successful
             market navigation, offering informed decisions and optimal results.
-          </span>
+          </span> */}
         </motion.div>
 
         <div className="pt-6">
@@ -85,7 +85,7 @@ export default function SectionBenifit() {
                   <p className="pb-2 font-medium sm:text-lg lg:text-2xl">
                     {feature.title}
                   </p>
-                  <span className="lg:text text-gray-500 sm:text-xs">
+                  <span className="text-gray-500 sm:text-xs lg:text-[14px]">
                     {feature.description}
                   </span>
                 </div>
