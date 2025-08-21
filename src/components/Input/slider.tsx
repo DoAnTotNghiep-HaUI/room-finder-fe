@@ -8,7 +8,7 @@ interface DualRangeSliderProps
   labelPosition?: "top" | "bottom" | "static";
   labelContentPos?: "left" | "right";
   label?: React.ReactNode | ((value: number | undefined) => React.ReactNode);
-  title: string;
+  title?: string;
 }
 
 const DualRangeSlider = React.forwardRef<
@@ -33,7 +33,7 @@ const DualRangeSlider = React.forwardRef<
     return (
       <>
         <div className="flex items-center pb-3">
-          <p className="mr-2 text-sm font-semibold">{title}:</p>
+          <p className="mr-2 text-sm font-semibold">{title}</p>
           {initialValue.map((value, index) => (
             <div className="text-sm">
               <motion.span

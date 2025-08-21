@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/utils/utils";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type Tab = {
   title: string;
@@ -15,7 +15,7 @@ export const Tabs = ({
   activeTabClassName,
   tabClassName,
   contentClassName,
-  url,
+  url = "/",
 }: {
   tabs: Tab[];
   containerClassName?: string;
@@ -24,7 +24,14 @@ export const Tabs = ({
   contentClassName?: string;
   url?: string;
 }) => {
-  const [active, setActive] = useState<Tab>(propTabs[0]);
+  const { search } = useLocation();
+  const currentTab =
+    new URLSearchParams(search).get("roomType") || propTabs[0]?.value;
+
+  const [active, setActive] = useState<Tab>(
+    propTabs.find((tab) => tab.value === currentTab) || propTabs[0]
+  );
+
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -40,6 +47,11 @@ export const Tabs = ({
   //     scrollRef.current?.removeEventListener("scroll", handleScroll);
   //   };
   // }, []);
+  useEffect(() => {
+    // Đồng bộ active tab khi URL thay đổi từ bên ngoài
+    const newActive = propTabs.find((tab) => tab.value === currentTab);
+    if (newActive) setActive(newActive);
+  }, [currentTab, propTabs]);
   return (
     <div className="relative w-full overflow-hidden">
       {/* Tab Navigation */}
@@ -65,7 +77,7 @@ export const Tabs = ({
             key={tab.value}
             onClick={() => {
               setActive(tab);
-              navigate(`${url}?${tab.value}`);
+              navigate(`${url}?roomType=${tab.value}`);
             }}
             className={cn(
               "relative mx-2 flex-shrink-0 rounded-full px-4 py-2 transition",

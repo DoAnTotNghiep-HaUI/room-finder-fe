@@ -23,4 +23,5 @@ export interface IUser {
   phone: string;
   status: string;
   id: string;
+  role: any;
 }

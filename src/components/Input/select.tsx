@@ -49,7 +49,7 @@ const Select: React.FC<CustomSelectProps> = ({
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="pr-4">
-          {options.find((option) => option.value === value)?.label ||
+          {options?.find((option) => option.value === value)?.label ||
             `${placeholder}`}
         </span>
         <span className={cn(isOpen ? "rotate-180 duration-300" : "rotate-0")}>
@@ -67,7 +67,7 @@ const Select: React.FC<CustomSelectProps> = ({
             : "pointer-events-none -translate-y-2 opacity-0"
         )}
       >
-        {options.map((option) => (
+        {options?.map((option) => (
           <div
             key={option.value}
             className="flex cursor-pointer items-center justify-between rounded px-4 py-2 hover:bg-primary hover:text-white"

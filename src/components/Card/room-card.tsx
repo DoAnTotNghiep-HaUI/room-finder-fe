@@ -90,7 +90,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
       </div>
       {/* Content Section */}
       <div
-        className={`flex-1 p-4 ${layout === "horizontal" ? "flex flex-col justify-between" : ""}`}
+        className={`flex-1 p-4 ${layout === "horizontal" ? "flex flex-col justify-between" : ""} h-[260px]`}
       >
         {/* Header */}
         <div className="space-y-2">
@@ -144,7 +144,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
         {/* Posted Date */}
         <div className="mt-4 flex items-center justify-between">
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            Posted {formatDate(room?.date_created)}
+            Đã đăng {formatDate(room?.date_created)}
           </p>
           <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
             {room?.room_price}VND

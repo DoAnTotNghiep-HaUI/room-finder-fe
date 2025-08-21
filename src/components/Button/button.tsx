@@ -8,6 +8,7 @@ interface ButtonProps {
   type?: "button" | "submit" | "reset";
   icon?: React.ReactNode;
   content: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ const Button: React.FC<ButtonProps> = ({
   type = "button",
   icon,
   content,
+  onClick,
   className,
 }) => {
   const variantClasses = {
@@ -43,6 +45,7 @@ const Button: React.FC<ButtonProps> = ({
         }`,
         className
       )}
+      onClick={onClick}
     >
       <span>{content}</span>
       {icon && <span className="ml-2">{icon}</span>}

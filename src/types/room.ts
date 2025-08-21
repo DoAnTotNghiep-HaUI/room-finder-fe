@@ -5,6 +5,8 @@ export interface RoomParams {
   isLoading: boolean;
   errorMessage: string;
   roomList: IRoom[] | null;
+  roomNewPost: IRoom[] | null;
+  roomCheapPrice: IRoom[] | null;
 }
 export interface RoomDetailParams {
   isLoading: boolean;
@@ -15,12 +17,12 @@ export interface IRoom {
   id: string;
   title: string;
   room_type: IRoomType;
-  furniture: Record<string, boolean | string | number>;
-  amenities: Record<string, boolean | string | number>;
+  deposit: number;
+  services: IService[];
+  furnitures: IFurniture[];
+  amenities: IAmenity[];
   video: IFile;
-  photos: {
-    directus_files_id: IFile[];
-  };
+  photos: IFile[];
   rental_object: string;
   limit_people: number;
   description: string;
@@ -38,4 +40,21 @@ export interface IRoom {
 export interface IRoomType {
   id: string;
   name: string;
+}
+export interface IService {
+  id: string;
+  name: string;
+  default_price: number;
+  unit: string;
+  icon: IFile;
+}
+export interface IFurniture {
+  id: string;
+  name: string;
+  icon: IFile;
+}
+export interface IAmenity {
+  id: string;
+  name: string;
+  icon: IFile;
 }

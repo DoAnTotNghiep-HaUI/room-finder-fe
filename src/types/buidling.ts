@@ -19,4 +19,6 @@ export interface IBuilding {
   ward: string;
   specific_address: string;
   building_image: IFile;
+  description: string;
+  google_map_link: string;
 }

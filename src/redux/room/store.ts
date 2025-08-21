@@ -1,12 +1,14 @@
-import {  RoomParams } from "@/types/room";
+import { RoomParams } from "@/types/room";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
-import { getListRoom } from "./action";
+import { getListRoom, getRoomCheapPrice, getRoomNewPost } from "./action";
 
 const initialState: RoomParams = {
   isLoading: false,
   errorMessage: "",
   roomList: null,
+  roomNewPost: null,
+  roomCheapPrice: null,
 };
 
 const roomSlice = createSlice({
@@ -28,6 +30,21 @@ const roomSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(getListRoom.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(getRoomNewPost.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getRoomNewPost.fulfilled, (state, action) => {
+        state.roomNewPost = action.payload;
+
+        state.isLoading = false;
+      })
+      .addCase(getRoomNewPost.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(getRoomCheapPrice.fulfilled, (state, action) => {
+        state.roomCheapPrice = action.payload;
         state.isLoading = false;
       });
   },
