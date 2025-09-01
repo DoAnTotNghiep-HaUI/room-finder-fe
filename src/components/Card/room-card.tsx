@@ -37,7 +37,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     
   `;
   const imageContainerClasses = `
-    relative overflow-hidden hover:cursor-pointer
+    relative overflow-hidden hover:cursor-pointer max-h-[260px]
     ${layout === "horizontal" ? "w-1/3" : "w-full aspect-[4/3]"}
   `;
 
@@ -131,7 +131,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             <FaMapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span className="line-clamp-1">
               {room?.building?.specific_address},{room?.building?.ward},
-              {room?.building?.district},{room?.building?.city}
+              {room?.building?.district?.name},{room?.building?.city}
             </span>
           </div>
           {room?.building?.name && (

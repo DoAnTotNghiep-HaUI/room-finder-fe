@@ -7,11 +7,16 @@ import { getListAmenities } from "@/redux/amenities/action";
 import { getListFurnitures } from "@/redux/furnitures/action";
 import { IAmenity, IFurniture } from "@/types/room";
 import React, { useEffect, useState } from "react";
+import { UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-interface CategorySelectorProps {
-  onSelectionChange?: (selectedCategories: string[]) => void;
+interface ChildProps {
+  setFormValue: UseFormSetValue<any>;
+  getFormValue: UseFormWatch<any>;
 }
-export default function AdvanceSearch() {
+export default function AdvanceSearch({
+  setFormValue,
+  getFormValue,
+}: ChildProps) {
   const [price, setPrice] = useState([1, 20]);
   const [area, setArea] = useState([10, 100]);
   const [rooms, setRooms] = useState<string | number>("1");
@@ -80,7 +85,7 @@ export default function AdvanceSearch() {
           </div>
         </div>
         <div className="grid gap-4 pb-8 sm:grid-cols-1 lg:grid-cols-3 lg:px-8">
-          <Select
+          {/* <Select
             label="Số lượng người"
             options={[
               { value: 1, label: "1" },
@@ -89,11 +94,12 @@ export default function AdvanceSearch() {
               { value: 4, label: "4" },
             ]}
             value={1}
+            
             onChange={(value) => setRooms(value)}
             className="border border-accent"
             width={48}
-          />
-          <Select
+          /> */}
+          {/* <Select
             label="Loại hợp đồng"
             options={[
               { value: "3_months", label: "3 tháng" },
@@ -105,7 +111,7 @@ export default function AdvanceSearch() {
             onChange={(value) => setContractsDuration(value)}
             className="border border-accent"
             width={72}
-          />
+          /> */}
         </div>
         <div className="">
           <p className="font-sm pb-2 font-semibold">Tiện nghi: </p>

@@ -32,36 +32,26 @@ import { IRoomType } from "@/types/room";
 import { BiChevronDown, BiMapPin } from "react-icons/bi";
 import Input from "@/components/Input/input";
 import { getListDistrict } from "@/redux/districts/action";
-import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { getListBlog } from "@/redux/blog/action";
 import { IBlog } from "@/types/blog";
+import { useForm } from "react-hook-form";
+import { setSearchParam } from "@/redux/room/store";
+import { getDistrict } from "@/utils/utils";
 
-const blogPosts = [
-  {
-    id: "1",
-    title: "10 Essential Tips for First-Time Renters",
-    excerpt:
-      "Navigate the rental market confidently with these proven tips for first-time renters...",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-    author: {
-      name: "Sarah Johnson",
-      avatar: "https://placehold.co/100x100?text=SJ",
-      role: "Housing Specialist",
-    },
-    category: "Rental Tips",
-    date: "2024-01-15",
-    readTime: "5 min read",
-    tags: ["First-time renters", "Tips", "Housing"],
-  },
-];
 const cities = [
   { name: "Hà Nội", value: "hanoi" },
-  { name: "Đà Nẵng", value: "danang" },
-  { name: "Hồ Chí Minh", value: "hochiminh" },
+  // { name: "Đà Nẵng", value: "danang" },
+  // { name: "Hồ Chí Minh", value: "hochiminh" },
 ];
 function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { roomList, roomNewPost, roomCheapPrice } = useSelector(
+  const { searchParam, roomNewPost, roomCheapPrice } = useSelector(
     (state: AppState) => state.room
   );
   const { search } = useLocation();
@@ -71,15 +61,39 @@ function HomePage() {
 
   const { districtList } = useSelector((state: AppState) => state.districts);
   const [currentPosition, setCurrentPosition] = useState(null);
-  const [assignedTo, setAssignedTo] = useState<string | number>("");
-  const [selectedCity, setSelectedCity] = useState("Đà Nẵng");
+  // const [selectedCity, setSelectedCity] = useState("Đà Nẵng");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [districts, setDistricts] = useState([]);
+
   const listRoomCard = useInViewEffect();
   const location = useInViewEffect();
   const topRoomCard = useInViewEffect();
   const blogCard = useInViewEffect();
-  const totalPagesBlog = 10;
-  const [currentPageBlog, setCurrentPageBlog] = useState(1);
+  const navigate = useNavigate();
+  const { register, handleSubmit, setValue, watch } = useForm();
+  const selectedCity = watch("city") || "Hà Nội";
+  const selectedRoomType = watch("roomType") || "";
+  const selectedDistrict = watch("district") || "";
+
+  // const distric
+  const handleFormSubmit = (data) => {
+    dispatch(setSearchParam(data));
+    const queryParams = new URLSearchParams();
+    queryParams.append("city", selectedCity);
+    if (data.roomType) queryParams.append("roomType", data.roomType);
+    if (data.district) queryParams.append("district", data.district);
+    if (data.price)
+      queryParams.append("priceRange", `[${data.price[0]}, ${data.price[1]}]`);
+    if (data.area)
+      queryParams.append("areaRange", `[${data.area[0]}, ${data.area[1]}]`);
+    if (data.amenities) queryParams.append("amenities", data.amenities);
+    if (data.furnitures) queryParams.append("furnitures", data.furnitures);
+
+    navigate(`/find-rental?${queryParams.toString()}`);
+    console.log("data form", data);
+
+    // if (data.district) queryParams.append("district", data.district);
+  };
   // navigator.geolocation.getCurrentPosition(async (position) => {
   //   console.log("Latitude:", position.coords.latitude);
   //   console.log("Longitude:", position.coords.longitude);
@@ -100,7 +114,7 @@ function HomePage() {
     value: type?.id,
   }));
   useEffect(() => {
-    dispatch(getListRoom());
+    dispatch(getListRoom(searchParam));
     dispatch(getListRoomType());
     dispatch(getListDistrict());
     dispatch(getRoomCheapPrice());
@@ -120,6 +134,23 @@ function HomePage() {
     label: rt.name,
   }));
   const top3NewBlog = blogList?.slice(0, 3);
+  useEffect(() => {
+    getDistrict().then((data) => {
+      const result = data?.districts?.map((district) => ({
+        value: district?.codename,
+        label: district?.name,
+      }));
+      setDistricts(result);
+    });
+  }, []);
+  console.log("districts", districts);
+
+  const districtOptions = districtList?.map((district) => ({
+    value: district?.id,
+    label: district?.name,
+  }));
+  const districtData = districtList?.filter((district) => district?.photo);
+  console.log("disstricOption", districtOptions);
 
   return (
     <>
@@ -145,7 +176,7 @@ function HomePage() {
             </p>
           </div>
           <div className="mx-auto bg-contrastText sm:rounded-md md:w-[600px] lg:w-[1400px] lg:rounded-full lg:p-4">
-            <form onSubmit={(e) => e.preventDefault()}>
+            <form onSubmit={handleSubmit(handleFormSubmit)}>
               <div className="space-y-4 lg:flex lg:items-center lg:justify-between lg:gap-1 lg:space-y-0">
                 <div className="flex-cols w-full gap-3 px-3 lg:flex lg:divide-x">
                   <div className="w-full py-3 pl-3 lg:w-1/3">
@@ -153,14 +184,16 @@ function HomePage() {
                       label="Loại phòng"
                       placeholder="Tất cả"
                       options={roomType}
-                      value={assignedTo}
-                      onChange={(value) => setAssignedTo(value)}
+                      value={selectedRoomType}
+                      onChange={(value) => setValue("roomType", value)}
+                      multiple={true}
                     />
                   </div>
                   <div className="w-full py-3 pl-5 pr-3 lg:w-2/3">
                     <div className="lg:w-4xl mx-auto flex items-center gap-2 rounded-full border border-[#1E88E5] border-primary bg-gray-50 p-2">
                       <div className="relative">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setIsDropdownOpen(!isDropdownOpen);
@@ -180,9 +213,10 @@ function HomePage() {
                               <button
                                 key={city.value}
                                 onClick={() => {
-                                  setSelectedCity(city.name);
+                                  // setSelectedCity(city.name);
                                   setIsDropdownOpen(false);
                                 }}
+                                type="button"
                                 className="w-full px-4 py-2 text-left transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-[#1E88E5]/10 focus:bg-[#1E88E5]/10 focus:outline-none"
                               >
                                 {city.name}
@@ -194,9 +228,12 @@ function HomePage() {
 
                       {/* Search Input - already using pure Tailwind */}
                       <div className="relative flex-1">
-                        <Input
-                          className="w-2xl border-0"
-                          placeholder="Tìm kiếm theo quận, tên đường,.."
+                        <Select
+                          label="Quận/Huyện"
+                          placeholder="Tất cả"
+                          options={districts}
+                          value={selectedDistrict}
+                          onChange={(value) => setValue("district", value)}
                         />
                       </div>
                     </div>
@@ -205,7 +242,10 @@ function HomePage() {
 
                 <div className="flex flex-col items-center justify-center gap-4 sm:px-4 lg:flex-row lg:px-2">
                   <div className="sm:w-full lg:w-1/2">
-                    <ModalSearch />
+                    <ModalSearch
+                      setValue={setValue}
+                      watch={watch}
+                    />
                   </div>
                   <div className="m-4 flex justify-center sm:w-full lg:w-1/2">
                     <Button
@@ -286,7 +326,7 @@ function HomePage() {
             transition={{ duration: 0.75, ease: "easeIn", delay: 0.25 }}
             // className="w-full"
           >
-            <LocationCard districtData={districtList} />
+            <LocationCard districtData={districtData} />
           </motion.div>
         </div>
         <div className="flex flex-col items-center justify-center py-[64px]">

@@ -10,9 +10,10 @@ interface Option {
 
 interface CustomSelectProps {
   label?: string;
-  options: Option[];
-  value: string | number;
-  onChange: (value: string | number) => void;
+  options: Array<{ value: string | number; label: string }>;
+  value?: string | number | Array<string | number>;
+  onChange: (value: string | number | Array<string | number>) => void;
+  multiple?: boolean;
   className?: string;
   width?: number;
   placeholder?: string;
@@ -26,11 +27,20 @@ const Select: React.FC<CustomSelectProps> = ({
   width = 32,
   placeholder,
   className,
+  multiple = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleOptionClick = (selectedValue: string | number) => {
-    onChange(selectedValue);
+  const handleOptionClick = (
+    selectedValue: string | number | Array<string | number>
+  ) => {
+    if (multiple) {
+      // Xử lý cho multiple selection
+      onChange(Array.isArray(selectedValue) ? selectedValue : [selectedValue]);
+    } else {
+      // Xử lý cho single selection
+      onChange(Array.isArray(selectedValue) ? selectedValue[0] : selectedValue);
+    }
     setIsOpen(false);
   };
 
@@ -60,6 +70,7 @@ const Select: React.FC<CustomSelectProps> = ({
       {/* Dropdown */}
       <div
         className={cn(
+          "max-h-80 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary dark:[&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:w-1",
           "absolute left-0 right-0 z-10 mt-1 rounded-md bg-white shadow-lg",
           "transform transition-all duration-300 ease-in-out",
           isOpen
