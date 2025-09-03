@@ -4,9 +4,31 @@ import { IFile } from "./file";
 export interface RoomParams {
   isLoading: boolean;
   errorMessage: string;
+  searchParam: SearchParams | null;
   roomList: IRoom[] | null;
   roomNewPost: IRoom[] | null;
   roomCheapPrice: IRoom[] | null;
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+}
+export interface SearchParams {
+  city?: string;
+  specific_address: string;
+  ward?: string;
+  roomType?: [string];
+  district?: string;
+  price?: [number, number];
+  area?: [number, number];
+  limitPeople?: number;
+  contractsDuration?: string;
+  sortBy?: string;
+  title?: string;
+  amenities?: string[];
+  furnitures?: string[];
 }
 export interface RoomDetailParams {
   isLoading: boolean;

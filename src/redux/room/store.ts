@@ -7,8 +7,15 @@ const initialState: RoomParams = {
   isLoading: false,
   errorMessage: "",
   roomList: null,
+  searchParam: null,
   roomNewPost: null,
   roomCheapPrice: null,
+  pagination: {
+    currentPage: 1,
+    totalPages: 0,
+    totalItems: 0,
+    itemsPerPage: 10,
+  },
 };
 
 const roomSlice = createSlice({
@@ -18,6 +25,17 @@ const roomSlice = createSlice({
     setRoomList: (state, action: PayloadAction<any>) => {
       state.roomList = action.payload;
     },
+    setSearchParam: (state, action: PayloadAction<any>) => {
+      state.searchParam = action.payload;
+      state.pagination.currentPage = 1;
+    },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.pagination.currentPage = action.payload;
+    },
+    setItemsPerPage: (state, action: PayloadAction<number>) => {
+      state.pagination.itemsPerPage = action.payload;
+      state.pagination.currentPage = 1;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -25,9 +43,20 @@ const roomSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(getListRoom.fulfilled, (state, action) => {
-        state.roomList = action.payload;
+        state.roomList = action.payload.data;
+        console.log(" action.payload", action.payload);
 
         state.isLoading = false;
+        const totalItems = action.payload.total;
+        const itemsPerPage = action.payload.limit || 10;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        state.pagination = {
+          currentPage: action.payload.page || 1,
+          totalPages,
+          totalItems,
+          itemsPerPage,
+        };
       })
       .addCase(getListRoom.rejected, (state) => {
         state.isLoading = false;
@@ -49,6 +78,7 @@ const roomSlice = createSlice({
       });
   },
 });
-export const { setRoomList } = roomSlice.actions;
+export const { setRoomList, setSearchParam, setCurrentPage, setItemsPerPage } =
+  roomSlice.actions;
 
 export default roomSlice.reducer;

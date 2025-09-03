@@ -15,10 +15,17 @@ export interface IBuilding {
   name: string;
   area: string;
   city: string;
-  district: string;
+  district: IDistrict;
   ward: string;
   specific_address: string;
   building_image: IFile;
   description: string;
   google_map_link: string;
+  lat: number;
+  lng: number;
+}
+export interface IDistrict {
+  id: string;
+  name: string;
+  photo: IFile;
 }

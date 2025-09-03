@@ -1,6 +1,7 @@
 import { URL_IMAGE } from "@/constants";
 import { IFile } from "@/types/file";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { UseFormSetValue, UseFormWatch } from "react-hook-form";
 
 interface Category {
   id: string;
@@ -13,6 +14,9 @@ interface ReusableCategorySelectorProps {
   onSelectionChange?: (selectedCategories: string[]) => void;
   maxSelections?: number;
   cols?: number;
+  setValue?: UseFormSetValue<any>;
+  watch?: UseFormWatch<any>;
+  name: string;
 }
 
 export default function ReusableCategorySelector({
@@ -20,26 +24,44 @@ export default function ReusableCategorySelector({
   onSelectionChange,
   maxSelections,
   cols = 4,
+  setValue,
+  watch,
+  name,
 }: ReusableCategorySelectorProps) {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const formValue = watch ? watch(name) : undefined;
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    formValue || []
+  );
+
+  useEffect(() => {
+    if (formValue !== undefined) {
+      setSelectedCategories(formValue);
+    }
+  }, [formValue]);
 
   const toggleCategory = (categoryId: string) => {
-    const isCurrentlySelected = selectedCategories.includes(categoryId);
+    let newSelection: string[];
 
-    // If trying to select and already at max, don't allow
-    if (
-      !isCurrentlySelected &&
-      maxSelections &&
-      selectedCategories.length >= maxSelections
-    ) {
-      return;
+    if (selectedCategories.includes(categoryId)) {
+      // Bỏ chọn
+      newSelection = selectedCategories.filter((id) => id !== categoryId);
+    } else {
+      // Chọn mới - kiểm tra max selections
+      if (maxSelections && selectedCategories.length >= maxSelections) {
+        return;
+      }
+      newSelection = [...selectedCategories, categoryId];
     }
 
-    const newSelection = isCurrentlySelected
-      ? selectedCategories.filter((id) => id !== categoryId)
-      : [...selectedCategories, categoryId];
-
+    // Cập nhật local state
     setSelectedCategories(newSelection);
+
+    // Cập nhật form value nếu có setValue
+    if (setValue) {
+      setValue(name, newSelection);
+    }
+
+    // Gọi callback nếu có
     onSelectionChange?.(newSelection);
   };
   console.log("category", categories);

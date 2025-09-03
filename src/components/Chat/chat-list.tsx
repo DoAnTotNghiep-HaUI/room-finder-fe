@@ -4,7 +4,6 @@ import type React from "react";
 
 import { formatDistanceToNow } from "date-fns";
 import { BiSearch } from "react-icons/bi";
-import { useChat } from "@/context/chat-context";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, AppState } from "@/redux";
 import { useEffect } from "react";
@@ -12,12 +11,20 @@ import { getListConversationByUserId } from "@/redux/conversation/action";
 import { URL_IMAGE } from "@/constants";
 import avatar from "../../assets/images/Profile_avatar_placeholder_large.png";
 import { setConversationId } from "@/redux/conversation/store";
+import { useChat } from "@/hooks/useChat";
+import { cn } from "@/utils/utils";
 interface ChatListProps {
   onSelectConversation: () => void;
 }
 
 const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
-  const { getConversationPartner } = useChat();
+  const {
+    getConversationPartner,
+    // conversations,
+    getUnreadCount,
+    markConversationAsRead,
+    joinConversation,
+  } = useChat();
   const { conversations } = useSelector(
     (state: AppState) => state.conversation
   );
@@ -26,19 +33,20 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
   const { currentConversationId } = useSelector(
     (state: AppState) => state.conversation
   );
-  const handleSelectConversation = (conversationId: string) => {
+  const handleSelectConversation = async (conversationId: string) => {
     // console.log("conversationId", conversationId);
 
     // dispatch({ type: "SET_ACTIVE_CONVERSATION", conversationId });
     // dispatch({ type: "MARK_AS_READ", conversationId });
+    if (conversationId === currentConversationId) return;
+    await joinConversation(conversationId);
+    markConversationAsRead(conversationId);
     dispatchAction(setConversationId(conversationId));
     onSelectConversation();
   };
   console.log("conversations", conversations);
   console.log("conversationListId", currentConversationId);
-  useEffect(() => {
-    dispatchAction(getListConversationByUserId(userInfo?.id));
-  }, [userInfo?.id]);
+
   const formatLastMessageTime = (dateStr?: string) => {
     if (!dateStr) return "Không rõ thời gian";
     const date = new Date(dateStr);
@@ -124,8 +132,15 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <p className="flex-1 truncate text-sm text-gray-500 dark:text-gray-400">
-                    {lastMessage?.sender === userInfo?.id ? "You: " : ""}
+                  <p
+                    className={cn(
+                      "flex-1 truncate text-sm dark:text-gray-400",
+                      conversation.unread_count
+                        ? "font-semibold text-black"
+                        : "text-gray-500"
+                    )}
+                  >
+                    {lastMessage?.sender === userInfo?.id ? "Bạn: " : ""}
 
                     {String(lastMessage?.content)}
                   </p>
