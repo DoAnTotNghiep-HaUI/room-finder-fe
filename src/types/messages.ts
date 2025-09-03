@@ -9,7 +9,7 @@ export interface IMessage {
   attachments?: IFile[];
   type: "text" | "file" | "link";
   reactions?: string[];
-  status: "sent" | "delivered" | "read";
+  status: "Đang gửi" | "Đã gửi" | "Đã đọc";
   conversation: string;
   date_created: string;
   user_created: IUser;

@@ -53,6 +53,7 @@ export const getListConversationByUserId = createAsyncThunk(
               },
             },
           },
+          sort: ["-last_message_time"],
         })
       );
       return res as IConversation[];

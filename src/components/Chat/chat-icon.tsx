@@ -4,13 +4,23 @@ import { useState, useRef, useEffect } from "react";
 import { FiMessageCircle } from "react-icons/fi";
 import ChatList from "./chat-list";
 import { FaFacebookMessenger } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, AppState } from "@/redux";
+import { getListConversationByUserId } from "@/redux/conversation/action";
 
 const ChatIcon: React.FC = () => {
   const { getUnreadCount } = useChat();
+  const { conversations } = useSelector(
+    (state: AppState) => state.conversation
+  );
+  const { userInfo } = useSelector((state: AppState) => state.auth);
+  const dispatchAction = useDispatch<AppDispatch>();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const unreadCount = getUnreadCount();
-
+  // const unreadCount = getUnreadCount();
+  useEffect(() => {
+    dispatchAction(getListConversationByUserId(userInfo?.id));
+  }, [userInfo?.id]);
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
@@ -31,7 +41,9 @@ const ChatIcon: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  const unreadCount = conversations?.filter(
+    (conversation) => conversation.unread_count
+  ).length;
   return (
     <div
       className="relative"

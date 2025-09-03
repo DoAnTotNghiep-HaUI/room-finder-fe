@@ -6,7 +6,7 @@ import { IMessage } from "@/types/messages";
 import directus from "@/utils/directus";
 import { getSocket, initializeSocket } from "@/utils/socket";
 import { readItems, updateItem, uploadFiles } from "@directus/sdk";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
 
 export const useChat = () => {
@@ -21,7 +21,7 @@ export const useChat = () => {
   );
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
-
+  const activeConversationRef = useRef<string | null>(null);
   // Khởi tạo socket khi hook được sử dụng
   useEffect(() => {
     const socketInstance = initializeSocket(userInfo?.id);
@@ -116,18 +116,15 @@ export const useChat = () => {
       socket.off("new_message", handleNewMessage);
     };
   }, [socket]);
-
   // Lấy danh sách conversation
   const fetchConversations = useCallback(async () => {
+    if (!userInfo?.id) return;
     try {
       const response = await directus.request<IConversation[]>(
         readItems("conversation", {
-          filter: {
-            participants: {
-              _contains: [userInfo?.id],
-            },
-          },
-          fields: ["*", "participants.*"],
+          filter: { participants: { _contains: [userInfo.id] } },
+          fields: ["*", "participants.*", "last_message.*"],
+          sort: ["-last_message_time"],
         })
       );
       setConversations(response);
@@ -168,6 +165,68 @@ export const useChat = () => {
     },
     []
   );
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleMessagesRead = ({
+      conversationId,
+      userId,
+    }: {
+      conversationId: string;
+      userId: string;
+    }) => {
+      // Cập nhật trạng thái tin nhắn thành "read"
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.conversation === conversationId && msg.receiver === userId
+            ? { ...msg, status: "Đã đọc" }
+            : msg
+        )
+      );
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
+        )
+      );
+      socket.on("messages_read", handleMessagesRead);
+      return () => socket.off("messages_read", handleMessagesRead);
+    };
+  }, [socket]);
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleConversationUpdated = (updatedConversation: IConversation) => {
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === updatedConversation.id ? updatedConversation : conv
+        )
+      );
+      socket.on("conversation_updated", handleConversationUpdated);
+      return () =>
+        socket.off("conversation_updated", handleConversationUpdated);
+    };
+  }, [socket]);
+  useEffect(() => {
+    if (!socket) return;
+    const handleMessagesRead = (conversationId, userId) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.conversation === conversationId && msg.receiver === userId
+            ? { ...msg, status: "Đã đọc" }
+            : msg
+        )
+      );
+
+      // Reset unread_count về 0
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
+        )
+      );
+      socket.on("messages_read", handleMessagesRead);
+      return () => socket.off("messages_read", handleMessagesRead);
+    };
+  }, [socket]);
   const loadMoreMessages = useCallback(
     async (conversationId: string, currentMessages: IMessage[]) => {
       if (loadingMore || !hasMoreMessages) return;
@@ -197,7 +256,11 @@ export const useChat = () => {
     const grouped: Record<string, IMessage[]> = {};
 
     messages.forEach((message) => {
-      const date = new Date(message.date_created);
+      const date = message.date_created ? new Date(message.date_created) : null;
+
+      if (!date || isNaN(date.getTime())) {
+        return "Đang gửi...";
+      }
       const dateKey = date.toLocaleDateString("vi-VN", {
         day: "2-digit",
         month: "2-digit",
@@ -222,30 +285,84 @@ export const useChat = () => {
 
     const currentTime = new Date(messages[index].date_created).getTime();
     const prevTime = new Date(messages[index - 1].date_created).getTime();
-    return currentTime - prevTime > 5 * 60 * 1000; // 5 phút
+    return currentTime - prevTime > 5 * 60 * 1000;
   };
   // Tham gia vào conversation
 
   const joinConversation = useCallback(
     async (conversationId: string) => {
-      if (socket) {
+      if (socket && conversationId !== activeConversationRef.current) {
+        activeConversationRef.current = conversationId;
+
         if (activeConversation?.id) {
           socket.emit("leave_conversation", activeConversation.id);
         }
+
         socket.emit("join", conversationId);
 
-        // Đánh dấu tin nhắn là đã đọc
-        // socket.emit("update_message_status", {
-        //   conversationId,
-        //   status: "read",
-        // });
-        const conv = conversations.find((c) => c.id === conversationId);
-        setActiveConversation(conv || null);
         const initialMessages = await fetchMessages(conversationId);
         setMessages(initialMessages.reverse());
+
+        // Chỉ cập nhật unread_count, không cập nhật last_message
+        // setConversations((prev) =>
+        //   prev.map((conv) =>
+        //     conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
+        //   )
+        // );
+        markConversationAsRead(conversationId);
       }
     },
-    [socket, activeConversation, conversations, fetchMessages]
+    [socket, activeConversation, fetchMessages]
+  );
+  const markConversationAsRead = useCallback(
+    async (conversationId: string) => {
+      if (!conversationId) return;
+
+      // Update trên server
+      try {
+        await directus.request(
+          updateItem("conversation", conversationId, { unread_count: 0 })
+        );
+      } catch (err) {
+        console.error("Failed to update unread_count in backend:", err);
+      }
+
+      // Update local state
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
+        )
+      );
+
+      // Nếu đang mở conv thì cũng update messages status
+      if (activeConversation?.id === conversationId) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.receiver === userInfo?.id ? { ...m, status: "Đã đọc" } : m
+          )
+        );
+      }
+
+      // emit socket event để sync với người khác
+      if (socket) socket.emit("mark_as_read", conversationId);
+    },
+    [activeConversation, socket, userInfo?.id]
+  );
+  const getUnreadCount = useCallback(() => {
+    return conversations.reduce(
+      (total, conv) => total + (conv.unread_count || 0),
+      0
+    );
+  }, [conversations]);
+
+  // Lấy thông tin người chat
+  const getConversationPartner = useCallback(
+    (conversation: IConversation) => {
+      return conversation.participants?.find(
+        (participant) => participant.directus_users_id?.id !== userInfo?.id
+      );
+    },
+    [userInfo?.id]
   );
   const uploadFilesToDirectus = async (files: File[]) => {
     try {
@@ -300,7 +417,7 @@ export const useChat = () => {
         receiver: receiverId,
         content: content || "",
         type: files ? "file" : "text",
-        status: "sent",
+        status: "Đang gửi",
         date_created: new Date().toISOString(),
         user_created: userInfo.id,
         attachments: previewFiles.map(
@@ -379,7 +496,7 @@ export const useChat = () => {
         receiver: receiverId,
         content,
         type: "text",
-        status: "sent",
+        status: "Đang gửi",
         date_created: new Date().toISOString(),
         user_created: userInfo.id,
       };
@@ -430,7 +547,9 @@ export const useChat = () => {
     if (!socket) return;
 
     const handleNewMessage = (message: IMessage) => {
-      setMessages((prev) => [...prev, message]);
+      if (message.conversation === activeConversationRef.current) {
+        setMessages((prev) => [...prev, message]);
+      }
 
       // Cập nhật last message trong danh sách conversation
       setConversations((prev) =>
@@ -440,6 +559,10 @@ export const useChat = () => {
                 ...conv,
                 last_message: message,
                 last_message_time: message.date_created,
+                unread_count:
+                  conv.id === activeConversationRef.current
+                    ? 0
+                    : (conv.unread_count || 0) + 1,
               }
             : conv
         )
@@ -469,7 +592,9 @@ export const useChat = () => {
     joinConversation,
     sendMessage,
     sendMediaMessage,
-
     setActiveConversation,
+    markConversationAsRead,
+    getUnreadCount,
+    getConversationPartner,
   };
 };

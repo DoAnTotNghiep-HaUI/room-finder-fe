@@ -311,6 +311,7 @@ function HomePage() {
             content="Xem tất cả các phòng"
             icon={<FaArrowRight />}
             className="rounded-full p-4"
+            onClick={() => navigate("/find-rental")}
           />
         </div>
         <div
@@ -377,6 +378,7 @@ function HomePage() {
             content="Xem tất cả các phòng"
             icon={<FaArrowRight />}
             className="rounded-full p-4"
+            onClick={() => navigate("/find-rental")}
           />
         </div>
 
