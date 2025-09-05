@@ -7,7 +7,7 @@ import {
   getListConversationByUserId,
   openChatWithUser,
 } from "./action";
-import { ChatState, ConversationParam } from "@/types/chat";
+import { ChatState, ConversationParam, IConversation } from "@/types/chat";
 import { getMessagesByConversationId } from "../message/action";
 import { IMessage } from "@/types/messages";
 
@@ -39,6 +39,9 @@ const conversationSlice = createSlice({
       //   state.conversationListId?.push(action.payload);
       // }
       state.currentConversationId = action.payload;
+    },
+    setConversationList(state, action: PayloadAction<IConversation[]>) {
+      state.conversations = action.payload;
     },
     // removeConversationId(state, action: PayloadAction<string>) {
     //   state.conversationListId = state.conversationListId.filter(
@@ -88,6 +91,14 @@ const conversationSlice = createSlice({
         });
       }
     },
+    setConversationUpdated: (state, action: PayloadAction<IConversation>) => {
+      const idx = state.conversations.findIndex(
+        (c) => c.id === action.payload.id
+      );
+      if (idx !== -1) {
+        state.conversations[idx] = action.payload;
+      }
+    },
   },
 
   extraReducers: (builder) => {
@@ -106,7 +117,11 @@ const conversationSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(checkConversationExists.fulfilled, (state, action) => {
-        state.conversations = action.payload;
+        state.conversations = action.payload.map(
+          (conversation: IConversation) => ({
+            ...conversation,
+          })
+        );
 
         state.isLoading = false;
       })
@@ -135,5 +150,6 @@ export const {
   openTempConversation,
   closeTempConversation,
   confirmTempConversation,
+  setConversationUpdated,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;

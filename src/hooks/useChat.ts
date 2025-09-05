@@ -1,5 +1,6 @@
 // src/hooks/useChat.ts
-import { AppState } from "@/redux";
+import { AppDispatch, AppState } from "@/redux";
+import { setConversationUpdated } from "@/redux/conversation/store";
 import { IConversation } from "@/types/chat";
 import { IFile } from "@/types/file";
 import { IMessage } from "@/types/messages";
@@ -7,9 +8,10 @@ import directus from "@/utils/directus";
 import { getSocket, initializeSocket } from "@/utils/socket";
 import { readItems, updateItem, uploadFiles } from "@directus/sdk";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export const useChat = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [socket, setSocket] = useState<ReturnType<typeof getSocket>>();
   const [conversations, setConversations] = useState<IConversation[]>([]);
   const { userInfo } = useSelector((state: AppState) => state.auth);
@@ -50,10 +52,10 @@ export const useChat = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("new_message", (message) => {
-      console.log("Received new message:", message);
-      setMessages((prev) => [...prev, message]);
-    });
+    // socket.on("new_message", (message) => {
+    //   console.log("Received new message:", message);
+    //   setMessages((prev) => [...prev, message]);
+    // });
 
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
@@ -76,45 +78,45 @@ export const useChat = () => {
     // const handleNewMessage = (message: IMessage) => {
     //   setMessages((prev) => [...prev, message]);
     // };
-    const handleNewMessage = (message: IMessage) => {
-      // Check if this is an update to a temporary message
-      // setMessages((prev) => {
-      //   // If this message replaces a temporary one, find and replace it
-      //   const tempMessageIndex = prev.findIndex(
-      //     (m) =>
-      //       m.conversation === message.conversation &&
-      //       m.sender === message.sender &&
-      //       m.date_created === message.date_created
-      //   );
+    // const handleNewMessage = (message: IMessage) => {
+    // Check if this is an update to a temporary message
+    // setMessages((prev) => {
+    //   // If this message replaces a temporary one, find and replace it
+    //   const tempMessageIndex = prev.findIndex(
+    //     (m) =>
+    //       m.conversation === message.conversation &&
+    //       m.sender === message.sender &&
+    //       m.date_created === message.date_created
+    //   );
 
-      //   if (tempMessageIndex !== -1) {
-      //     const newMessages = [...prev];
-      //     newMessages[tempMessageIndex] = message;
-      //     return newMessages;
-      //   }
+    //   if (tempMessageIndex !== -1) {
+    //     const newMessages = [...prev];
+    //     newMessages[tempMessageIndex] = message;
+    //     return newMessages;
+    //   }
 
-      //   // Otherwise just add the new message
-      //   return [...prev, message];
-      // });
+    //   // Otherwise just add the new message
+    //   return [...prev, message];
+    // });
 
-      // Update conversation last message
-      setConversations((prev) =>
-        prev.map((conv) =>
-          conv.id === message.conversation
-            ? {
-                ...conv,
-                last_message: message,
-                last_message_time: message.date_created,
-              }
-            : conv
-        )
-      );
-    };
-    socket.on("new_message", handleNewMessage);
+    // Update conversation last message
+    //   setConversations((prev) =>
+    //     prev.map((conv) =>
+    //       conv.id === message.conversation
+    //         ? {
+    //             ...conv,
+    //             last_message: message,
+    //             last_message_time: message.date_created,
+    //           }
+    //         : conv
+    //     )
+    //   );
+    // };
+    // socket.on("new_message", handleNewMessage);
 
-    return () => {
-      socket.off("new_message", handleNewMessage);
-    };
+    // return () => {
+    //   socket.off("new_message", handleNewMessage);
+    // };
   }, [socket]);
   // Lấy danh sách conversation
   const fetchConversations = useCallback(async () => {
@@ -122,7 +124,7 @@ export const useChat = () => {
     try {
       const response = await directus.request<IConversation[]>(
         readItems("conversation", {
-          filter: { participants: { _contains: [userInfo.id] } },
+          filter: { participants: { _contains: [userInfo?.id] } },
           fields: ["*", "participants.*", "last_message.*"],
           sort: ["-last_message_time"],
         })
@@ -168,14 +170,27 @@ export const useChat = () => {
   useEffect(() => {
     if (!socket) return;
 
+    socket.on("conversation_updated", (conv: IConversation) => {
+      console.log("Received conversation_updated event:", conv);
+
+      dispatch(setConversationUpdated(conv));
+    });
+
+    return () => {
+      socket.off("conversation_updated");
+    };
+  }, [socket]);
+  useEffect(() => {
+    if (!socket) return;
+
     const handleMessagesRead = ({
       conversationId,
-      userId,
+      userId, // người vừa đọc
     }: {
       conversationId: string;
       userId: string;
     }) => {
-      // Cập nhật trạng thái tin nhắn thành "read"
+      // Phía NGƯỜI GỬI: các message có receiver === userId (tức đã gửi tới người vừa đọc) => set "Đã đọc"
       setMessages((prev) =>
         prev.map((msg) =>
           msg.conversation === conversationId && msg.receiver === userId
@@ -183,13 +198,18 @@ export const useChat = () => {
             : msg
         )
       );
+
+      // Reset badge hội thoại này về 0 cho cả 2 bên
       setConversations((prev) =>
         prev.map((conv) =>
           conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
         )
       );
-      socket.on("messages_read", handleMessagesRead);
-      return () => socket.off("messages_read", handleMessagesRead);
+    };
+
+    socket.on("messages_read", handleMessagesRead);
+    return () => {
+      socket.off("messages_read", handleMessagesRead);
     };
   }, [socket]);
   useEffect(() => {
@@ -201,32 +221,13 @@ export const useChat = () => {
           conv.id === updatedConversation.id ? updatedConversation : conv
         )
       );
-      socket.on("conversation_updated", handleConversationUpdated);
-      return () =>
-        socket.off("conversation_updated", handleConversationUpdated);
+    };
+    socket.on("conversation_updated", handleConversationUpdated);
+    return () => {
+      socket.off("conversation_updated", handleConversationUpdated);
     };
   }, [socket]);
-  useEffect(() => {
-    if (!socket) return;
-    const handleMessagesRead = (conversationId, userId) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.conversation === conversationId && msg.receiver === userId
-            ? { ...msg, status: "Đã đọc" }
-            : msg
-        )
-      );
 
-      // Reset unread_count về 0
-      setConversations((prev) =>
-        prev.map((conv) =>
-          conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
-        )
-      );
-      socket.on("messages_read", handleMessagesRead);
-      return () => socket.off("messages_read", handleMessagesRead);
-    };
-  }, [socket]);
   const loadMoreMessages = useCallback(
     async (conversationId: string, currentMessages: IMessage[]) => {
       if (loadingMore || !hasMoreMessages) return;
@@ -300,19 +301,21 @@ export const useChat = () => {
 
         socket.emit("join", conversationId);
 
-        const initialMessages = await fetchMessages(conversationId);
-        setMessages(initialMessages.reverse());
+        const conv = conversations.find((c) => c.id === conversationId);
+        setActiveConversation(conv || null);
 
-        // Chỉ cập nhật unread_count, không cập nhật last_message
-        // setConversations((prev) =>
-        //   prev.map((conv) =>
-        //     conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
-        //   )
-        // );
-        markConversationAsRead(conversationId);
+        const initial = await fetchMessages(conversationId);
+        setMessages(initial.reverse());
+
+        // Update local badge ngay (server vẫn cập nhật DB + phát events)
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === conversationId ? { ...c, unread_count: 0 } : c
+          )
+        );
       }
     },
-    [socket, activeConversation, fetchMessages]
+    [socket, activeConversation, conversations, fetchMessages]
   );
   const markConversationAsRead = useCallback(
     async (conversationId: string) => {
@@ -500,44 +503,24 @@ export const useChat = () => {
         date_created: new Date().toISOString(),
         user_created: userInfo.id,
       };
-
-      // Thêm ngay vào UI
       setMessages((prev) => [...prev, tempMessage]);
-      try {
-        // Send message with file IDs via socket
-        await new Promise<void>((resolve, reject) => {
-          socket.emit(
-            "send_message",
-            {
-              conversation: conversationId,
-              sender: userInfo.id,
-              receiver: receiverId,
-              content,
-            },
-            (response: {
-              success: boolean;
-              error?: string;
-              message?: IMessage;
-            }) => {
-              if (response.success) {
-                // console.log("newMessageDataa", response.message);
 
-                // directus.request(
-                //   updateItem("conversation", response.message.conversation, {
-                //     last_message: response.message.id,
-                //     last_message_time: response.message.date_created,
-                //   })
-                // );
-                resolve();
-              } else {
-                reject(response.error);
-              }
-            }
-          );
-        });
-      } catch (error) {
-        console.error("Failed to send message:", error);
-      }
+      await new Promise<void>((resolve, reject) => {
+        socket.emit(
+          "send_message",
+          {
+            conversation: conversationId,
+            sender: userInfo.id,
+            receiver: receiverId,
+            content,
+            client_temp_id: tempMessageId, // <-- thêm vào
+          },
+          (response) => {
+            if (response?.success) return resolve();
+            reject(response?.error || "Send failed");
+          }
+        );
+      });
     },
     [socket, userInfo?.id, sendMediaMessage]
   );
@@ -546,12 +529,32 @@ export const useChat = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewMessage = (message: IMessage) => {
-      if (message.conversation === activeConversationRef.current) {
+    const handleNewMessage = (
+      message: IMessage & { client_temp_id?: string }
+    ) => {
+      console.log("Received new message:", message);
+
+      // Xử lý tin nhắn tạm (optimistic update)
+      if (message.client_temp_id) {
+        setMessages((prev) => {
+          const idx = prev.findIndex((m) => m.id === message.client_temp_id);
+          if (idx !== -1) {
+            const next = [...prev];
+            next[idx] = message;
+            return next;
+          }
+          if (message.conversation === activeConversationRef.current) {
+            return [...prev, message];
+          }
+          return prev;
+        });
+      }
+      // Tin nhắn thông thường
+      else if (message.conversation === activeConversationRef.current) {
         setMessages((prev) => [...prev, message]);
       }
 
-      // Cập nhật last message trong danh sách conversation
+      // Cập nhật conversation
       setConversations((prev) =>
         prev.map((conv) =>
           conv.id === message.conversation
@@ -569,13 +572,20 @@ export const useChat = () => {
       );
     };
 
+    const handleConversationUpdated = (conv: IConversation) => {
+      setConversations((prev) =>
+        prev.map((c) => (c.id === conv.id ? conv : c))
+      );
+    };
+
     socket.on("new_message", handleNewMessage);
+    socket.on("conversation_updated", handleConversationUpdated);
 
     return () => {
       socket.off("new_message", handleNewMessage);
+      socket.off("conversation_updated", handleConversationUpdated);
     };
   }, [socket]);
-
   return {
     socket,
     conversations,
