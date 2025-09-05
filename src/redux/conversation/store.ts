@@ -7,7 +7,7 @@ import {
   getListConversationByUserId,
   openChatWithUser,
 } from "./action";
-import { ChatState, ConversationParam } from "@/types/chat";
+import { ChatState, ConversationParam, IConversation } from "@/types/chat";
 import { getMessagesByConversationId } from "../message/action";
 import { IMessage } from "@/types/messages";
 
@@ -40,11 +40,16 @@ const conversationSlice = createSlice({
       // }
       state.currentConversationId = action.payload;
     },
-    // removeConversationId(state, action: PayloadAction<string>) {
-    //   state.conversationListId = state.conversationListId.filter(
-    //     (id) => id !== action.payload
-    //   );
-    // },
+    setConversationList(state, action: PayloadAction<IConversation[]>) {
+      state.conversations = action.payload;
+    },
+    setActiveConversation: (state, action: PayloadAction<string | null>) => {
+      state.currentConversationId = action.payload;
+    },
+    resetUnread: (state, action: PayloadAction<string>) => {
+      const conv = state.conversations.find((c) => c.id === action.payload);
+      if (conv) conv.unread_count = 0;
+    },
     clearConversationList(state) {
       state.currentConversationId = null;
     },
@@ -88,6 +93,31 @@ const conversationSlice = createSlice({
         });
       }
     },
+    setConversationUpdated: (state, action: PayloadAction<IConversation>) => {
+      const idx = state.conversations.findIndex(
+        (c) => c.id === action.payload.id
+      );
+      if (idx !== -1) {
+        state.conversations[idx] = action.payload;
+      } else {
+        // nếu không tồn tại -> thêm vào đầu danh sách (most recent first)
+        state.conversations.unshift(action.payload);
+      }
+    },
+    incrementUnread: (state, action: PayloadAction<string>) => {
+      const conv = state.conversations.find((c) => c.id === action.payload);
+      if (conv) conv.unread_count = (conv.unread_count || 0) + 1;
+      else {
+        // nếu conversation chưa có trong danh sách, tạo placeholder với unread=1
+        state.conversations.unshift({
+          id: action.payload,
+          participants: [],
+          last_message: null,
+          unread_count: 1,
+          isTyping: false,
+        } as unknown as IConversation);
+      }
+    },
   },
 
   extraReducers: (builder) => {
@@ -106,7 +136,11 @@ const conversationSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(checkConversationExists.fulfilled, (state, action) => {
-        state.conversations = action.payload;
+        state.conversations = action.payload.map(
+          (conversation: IConversation) => ({
+            ...conversation,
+          })
+        );
 
         state.isLoading = false;
       })
@@ -130,10 +164,16 @@ const conversationSlice = createSlice({
 });
 export const {
   setConversationId,
+  setConversationList,
+  setActiveConversation,
+  resetUnread,
+
   clearConversationList,
   // removeConversationId,
   openTempConversation,
   closeTempConversation,
   confirmTempConversation,
+  setConversationUpdated,
+  incrementUnread,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
