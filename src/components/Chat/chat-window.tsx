@@ -51,7 +51,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     (state: AppState) => state.conversation
   );
   const {
-    activeConversation,
+    // activeConversation,
     messages,
     hasMoreMessages,
     loadingMore,
@@ -64,7 +64,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     joinConversation,
     sendMessage,
     sendMediaMessage,
-    setActiveConversation,
+    // setActiveConversation,
   } = useChat();
   const { conversation } = useSelector(
     (state: AppState) => state.conversationDetail
