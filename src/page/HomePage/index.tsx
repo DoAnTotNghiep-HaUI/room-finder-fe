@@ -43,6 +43,7 @@ import { IBlog } from "@/types/blog";
 import { useForm } from "react-hook-form";
 import { setSearchParam } from "@/redux/room/store";
 import { getDistrict } from "@/utils/utils";
+import Login from "@/components/Auth/login";
 
 const cities = [
   { name: "Hà Nội", value: "hanoi" },
@@ -271,16 +272,15 @@ function HomePage() {
           <p className="text-center text-4xl">Đề Xuất Cho Bạn</p>
         </div>
         <div className="flex justify-center sm:px-4 lg:px-8">
-          {TAB_MENU && TAB_MENU.length > 0 && (
+          {/* {TAB_MENU && TAB_MENU.length > 0 && (
             <Tabs
               tabs={TAB_MENU}
               url="/home"
               activeTabClassName="bg-[#1E88E5]"
               tabClassName="px-6 bg-gray-300 mx-2"
             />
-          )}
+          )} */}
         </div>
-
         <div
           ref={listRoomCard.ref}
           className="mx-auto grid gap-4 sm:max-w-[100%] sm:grid-cols-1 sm:px-4 md:grid-cols-2 sm:lg:grid-cols-3 lg:max-w-[70%] lg:grid-cols-3 lg:px-8"

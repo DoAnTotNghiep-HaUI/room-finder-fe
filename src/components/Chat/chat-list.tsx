@@ -135,7 +135,8 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
                   <p
                     className={cn(
                       "flex-1 truncate text-sm dark:text-gray-400",
-                      conversation.unread_count
+                      conversation.unread_count > 0 &&
+                        conversation.last_message?.sender !== userInfo?.id
                         ? "font-semibold text-black"
                         : "text-gray-500"
                     )}
@@ -144,9 +145,10 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectConversation }) => {
 
                     {String(lastMessage?.content)}
                   </p>
-                  {conversation.unread_count > 0 && (
-                    <span className="ml-2 h-3 w-3 rounded-full bg-blue-500"></span>
-                  )}
+                  {conversation.unread_count > 0 &&
+                    conversation.last_message?.sender !== userInfo?.id && (
+                      <span className="ml-2 h-3 w-3 rounded-full bg-blue-500"></span>
+                    )}
                 </div>
               </div>
             </div>

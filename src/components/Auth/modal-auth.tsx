@@ -18,7 +18,7 @@ export default function ModalAuth() {
 
   return (
     <div className="sm:w-full lg:flex lg:justify-end">
-      <Modal>
+      {/* <Modal>
         <ModalTrigger className="group/modal-btn md:w-full lg:flex lg:items-center lg:justify-center">
           <div className="flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-3 text-white duration-300 ease-in-out hover:bg-primary hover:text-white">
             <p>Đăng nhập</p>
@@ -33,7 +33,7 @@ export default function ModalAuth() {
             )}
           </ModalContent>
         </ModalBody>
-      </Modal>
+      </Modal> */}
     </div>
   );
 }

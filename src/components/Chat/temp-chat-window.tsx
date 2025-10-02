@@ -49,7 +49,7 @@ const TempChatWindow: React.FC<TempChatWindowProps> = ({
 
   const partner = roomDetail.roomDetail;
   const {
-    activeConversation,
+    // activeConversation,
     messages,
     fetchConversations,
     fetchMessages,
@@ -58,7 +58,7 @@ const TempChatWindow: React.FC<TempChatWindowProps> = ({
     joinConversation,
     sendMessage,
     sendMediaMessage,
-    setActiveConversation,
+    // setActiveConversation,
   } = useChat();
   useEffect(() => {
     const socketInstance = initializeSocket(userInfo?.id);
@@ -72,11 +72,9 @@ const TempChatWindow: React.FC<TempChatWindowProps> = ({
     };
   }, [userInfo?.id]);
   useEffect(() => {
-    // Kiểm tra lại trong trường hợp conversation được tạo từ nơi khác
     const existingConv = conversations.find((conv) =>
       conv.participants.some((p) => p.directus_users_id?.id === partnerId)
     );
-
     if (existingConv) {
       onConfirm(existingConv.id);
     }
@@ -119,7 +117,7 @@ const TempChatWindow: React.FC<TempChatWindowProps> = ({
       const newConv =
         conversations.find((c) => c.id === conversationId) ||
         ({ id: conversationId, participants: [] } as IConversation);
-      setActiveConversation(newConv);
+      // setActiveConversation(newConv);
       socket?.emit("join", conversationId);
 
       // 5. Delay nhỏ để đảm bảo socket join phòng

@@ -18,12 +18,10 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
   const [activeTab, setActiveTab] = useState<"images" | "videos">("images");
   const OPTIONS: EmblaOptionsType = {};
   const SLIDE_COUNT = 10;
-  console.log("images", images);
 
   const imgThumbs = images?.map(
     (img) => `${URL_IMAGE}/${img?.id}/${img?.filename_download}`
   );
-  console.log("slides", imgThumbs);
 
   return (
     <div className="space-y-4">

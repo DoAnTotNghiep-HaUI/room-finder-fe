@@ -2,19 +2,19 @@ import React from "react";
 export const Navigation = ({ mobile = false }: { mobile?: boolean }) => {
   const links = [
     {
-      name: "Home",
+      name: "Trang chủ",
       href: "/",
     },
     {
-      name: "Search",
+      name: "Tìm kiếm",
       href: "/find-rental",
     },
     {
-      name: "Blog",
+      name: "Bài viết",
       href: "/blog",
     },
     {
-      name: "Contact",
+      name: "Liên hệ",
       href: "/contact",
     },
   ];

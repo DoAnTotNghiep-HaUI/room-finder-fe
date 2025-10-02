@@ -38,22 +38,22 @@ export const Notification: React.FC<NotificationProps> = ({
         <div className="absolute right-0 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="divide-y divide-gray-100 py-1">
             <div className="flex items-center justify-between bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700">
-              <span className="text-xl font-semibold">Notifications</span>
+              <span className="text-xl font-semibold">Thông báo</span>
               {unreadCount > 0 && (
                 <span className="cursor-pointer text-xs text-blue-600 hover:underline">
-                  Mark all as read
+                  Đánh dấu đã đọc tất cả
                 </span>
               )}
             </div>
             {notifications.length === 0 ? (
               <div className="px-4 py-3 text-sm text-gray-500">
-                No notifications
+                Không có thông báo
               </div>
             ) : (
               notifications.slice(0, 5).map((notification) => (
                 <div
                   key={notification?.id}
-                  className={`cursor-pointer px-4 py-3 hover:bg-gray-50 ${!notification?.read ? "bg-blue-50" : ""}`}
+                  className={`cursor-pointer px-4 py-3 hover:bg-gray-50 ${notification?.status === "unread" ? "bg-blue-50" : ""}`}
                   onClick={() => handleNotificationClick(notification?.id)}
                 >
                   <p className="text-sm font-medium text-gray-900">
@@ -74,7 +74,7 @@ export const Notification: React.FC<NotificationProps> = ({
                 href="#"
                 className="text-sm text-blue-600 hover:underline"
               >
-                View all notifications
+                Xem tất cả thông báo
               </a>
             </div>
           </div>

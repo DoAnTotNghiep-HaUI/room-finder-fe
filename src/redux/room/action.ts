@@ -13,7 +13,7 @@ export const getListRoom = createAsyncThunk(
         sort.push(params.sortBy);
       }
       if (params?.title) {
-        filter._and.push({ title: { _contains: params.title } });
+        filter._and.push({ title: { _icontains: params.title } });
       }
       if (params?.city) {
         filter._and.push({ building: { city: { _eq: params.city } } });
@@ -127,11 +127,11 @@ export const getRoomNewPost = createAsyncThunk(
 
             "photos.*",
           ],
-          filter: {
-            room_type: {
-              _eq: roomType,
-            },
-          },
+          // filter: {
+          //   room_type: {
+          //     _eq: roomType,
+          //   },
+          // },
           sort: ["-date_created"],
           limit: 9,
         })

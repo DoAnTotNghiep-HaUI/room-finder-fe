@@ -28,7 +28,10 @@ export const useChat = () => {
   const activeConversationRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const socketInstance = initializeSocket(userInfo?.id);
+    const socketInstance = initializeSocket({
+      userId: userInfo?.id,
+      path: "/chat-socket",
+    });
     setSocket(socketInstance);
     socketInstance.emit("authenticate", userInfo?.id);
 
@@ -241,23 +244,6 @@ export const useChat = () => {
   );
 
   // helpers to upload files
-  const uploadFilesToDirectus = async (files: File[]) => {
-    try {
-      const uploadedFiles: IFile[] = [];
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        const uploadedFile = await directus.request<IFile>(
-          uploadFiles(formData)
-        );
-        uploadedFiles.push(uploadedFile);
-      }
-      return uploadedFiles;
-    } catch (error) {
-      console.error("Upload files error:", error);
-      throw new Error("Failed to upload files");
-    }
-  };
 
   // send media
   const sendMediaMessage = useCallback(
@@ -363,17 +349,37 @@ export const useChat = () => {
 
   const groupMessagesByDate = (messages: IMessage[]) => {
     const grouped: Record<string, IMessage[]> = {};
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
     messages.forEach((message) => {
-      const date = message.date_created ? new Date(message.date_created) : null;
-      if (!date || isNaN(date.getTime())) return;
-      const dateKey = date.toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      if (!message.date_created) return;
+
+      const date = new Date(message.date_created);
+      if (isNaN(date.getTime())) return;
+
+      // normalize về 00:00 để so sánh ngày
+      const msgDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+
+      let dateKey: string;
+      if (msgDate.getTime() === today.getTime()) {
+        dateKey = "Hôm nay";
+      } else {
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        dateKey = `${day} Tháng ${month}, ${year}`;
+      }
+
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(message);
     });
+
     return grouped;
   };
 
@@ -422,5 +428,20 @@ export const useChat = () => {
   // helper placeholder so TypeScript doesn't complain about missing loadMoreMessages export used earlier
   async function loadMoreMessagesPlaceholder() {
     return null;
+  }
+};
+export const uploadFilesToDirectus = async (files: File[]) => {
+  try {
+    const uploadedFiles: IFile[] = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadedFile = await directus.request<IFile>(uploadFiles(formData));
+      uploadedFiles.push(uploadedFile);
+    }
+    return uploadedFiles;
+  } catch (error) {
+    console.error("Upload files error:", error);
+    throw new Error("Failed to upload files");
   }
 };

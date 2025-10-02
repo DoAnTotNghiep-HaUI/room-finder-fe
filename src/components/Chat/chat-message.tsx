@@ -3,6 +3,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { User, Message as MessageType } from "../../types/chat";
 import { IMessage } from "@/types/messages";
 import { URL_IMAGE } from "@/constants";
+import { cn } from "@/utils/utils";
 
 interface ChatMessageProps {
   message: IMessage;
@@ -47,31 +48,31 @@ const ChatMessage = React.memo(
             />
           )}
 
-          <div className="group relative max-w-[70%]">
-            <div
-              className={` ${
-                isCurrentUser
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white"
-              } break-words rounded-2xl px-3 py-2`}
-              onClick={toggleReactions}
-            >
-              {message.content}
+          <div className="group relative flex max-w-[70%] flex-col gap-1">
+            {message?.content && (
+              <div
+                className={cn(
+                  "relative inline-block max-w-xs break-words rounded-2xl px-3 py-2",
+                  isCurrentUser
+                    ? "self-end rounded-full bg-blue-500 text-right text-white"
+                    : "self-start rounded-full bg-gray-200 text-left text-black"
+                )}
+              >
+                {message?.content}
+                <span
+                  className={cn(
+                    "absolute whitespace-nowrap text-xs text-gray-500 opacity-0 transition group-hover:opacity-100",
+                    isCurrentUser
+                      ? "-left-[50px] bottom-[10px]"
+                      : "-right-[50px] bottom-[10px]"
+                  )}
+                >
+                  {formattedTime}
+                </span>
+              </div>
+            )}
 
-              {showReactions && (
-                <div className="absolute -top-10 left-0 flex space-x-1 rounded-full bg-white p-1 shadow-lg dark:bg-gray-800">
-                  {["👍", "❤️", "😂", "😮", "😢", "😡"].map((reaction) => (
-                    <button
-                      key={reaction}
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      {reaction}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* {message.reactions && message.reactions.length > 0 && (
+            {/* {message.reactions && message.reactions.length > 0 && (
             <div className="absolute -bottom-2 right-2 flex items-center rounded-full bg-white px-1 text-xs shadow-sm dark:bg-gray-800">
               {message.reactions[0]}
               {message.reactions.length > 1 && (
@@ -79,7 +80,7 @@ const ChatMessage = React.memo(
               )}
             </div>
           )} */}
-            </div>
+            {/* </div> */}
             {/* 
         <div
           className={`mt-1 text-xs text-gray-500 dark:text-gray-400 ${isCurrentUser ? "text-right" : "text-left"}`}
@@ -90,14 +91,14 @@ const ChatMessage = React.memo(
           )} 
         </div> */}
             {/* {showTime && ( */}
-            <div
+            {/* <div
               className={` ${isCurrentUser ? "text-right" : "text-left"} duration-900 mb-2 mt-1 hidden text-xs text-gray-500 transition-opacity group-hover:block group-hover:opacity-100`}
             >
               {new Date(message.date_created).toLocaleTimeString("vi-VN", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-            </div>
+            </div> */}
             {message.attachments && message.attachments.length > 0 && (
               <div
                 className={`grid ${getGridClass(message?.attachments.length)} gap-1`}

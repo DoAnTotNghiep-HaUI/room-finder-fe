@@ -1,12 +1,18 @@
+import { AppDispatch } from "@/redux";
+import { createBooking } from "@/redux/booking/action";
 import type React from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FiX, FiCalendar, FiClock } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { date: string; time: string }) => void;
+  room_id: string;
+  landlord_id: string;
+  tenant_id: string;
 }
 
 interface FormData {
@@ -17,8 +23,11 @@ interface FormData {
 const BookingModal: React.FC<BookingModalProps> = ({
   isOpen,
   onClose,
-  onSubmit,
+  room_id,
+  landlord_id,
+  tenant_id,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const {
     register,
     handleSubmit,
@@ -29,16 +38,28 @@ const BookingModal: React.FC<BookingModalProps> = ({
   // Get today's date in YYYY-MM-DD format for min date validation
   const today = new Date().toISOString().split("T")[0];
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       reset();
     }
   }, [isOpen, reset]);
 
-  const submitHandler = (data: FormData) => {
-    onSubmit(data);
-    onClose();
+  const submitHandler = async (data: FormData) => {
+    const scheduled_date = `${data.date}T${data.time}:00`;
+    const payload = {
+      room_id,
+      landlord_id,
+      tenant_id,
+      scheduled_date,
+      status: "pending",
+    };
+    const result = await dispatch(createBooking(payload));
+    if (createBooking.fulfilled.match(result)) {
+      toast.success("Đặt lịch thành công!");
+      onClose();
+    } else {
+      toast.error("Đặt lịch thất bại!");
+    }
   };
 
   if (!isOpen) return null;
@@ -76,7 +97,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
               htmlFor="date"
               className="block text-sm font-medium text-gray-700"
             >
-              Select Date
+              Chọn ngày
             </label>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -110,7 +131,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
               htmlFor="time"
               className="block text-sm font-medium text-gray-700"
             >
-              Select Time
+              Chọn giờ
             </label>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -139,13 +160,13 @@ const BookingModal: React.FC<BookingModalProps> = ({
               onClick={onClose}
               className="w-full rounded-lg bg-gray-200 px-4 py-3 font-medium text-gray-800 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 sm:w-1/2"
             >
-              Cancel
+              Huỷ
             </button>
             <button
               type="submit"
               className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-1/2"
             >
-              Book Appointment
+              Đặt lịch
             </button>
           </div>
         </form>

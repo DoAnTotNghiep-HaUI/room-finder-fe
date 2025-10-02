@@ -12,6 +12,11 @@ export const limitPeople: RadioOption[] = [
   { label: "3 ", value: 3 },
   { label: "4 ", value: 4 },
 ];
+export const rentalObject: RadioOption[] = [
+  { label: "Nam", value: "male" },
+  { label: "Nữ", value: "female" },
+  { label: "Tất cả", value: "all" },
+];
 export const sortData: RadioOption[] = [
   { label: "Mới nhất ", value: "-date_created" },
   { label: "Giá thấp tới cao ", value: "room_price" },

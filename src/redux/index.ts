@@ -13,8 +13,11 @@ import funituresReducer from "./furnitures/store";
 import amenitiesReducer from "./amenities/store";
 import districtsReducer from "./districts/store";
 import blogReducer from "./blog/store";
-
-const rootReduce = combineReducers({
+import contractReducer from "./contracts/store";
+import invoiceReducer from "./invoice/store";
+import bookingReducer from "./booking/store";
+import requestReducer from "./request/store";
+const rootReducer = combineReducers({
   auth: authReducer,
   room: roomReducer,
   roomDetail: roomDetailReducer,
@@ -27,11 +30,15 @@ const rootReduce = combineReducers({
   amenities: amenitiesReducer,
   districts: districtsReducer,
   blog: blogReducer,
+  contracts: contractReducer,
+  invoices: invoiceReducer,
+  booking: bookingReducer,
+  request: requestReducer,
 });
-const store = configureStore({ reducer: rootReduce });
+const store = configureStore({ reducer: rootReducer });
 
 export type RootState = ReturnType<typeof store.getState>;
-export type AppState = ReturnType<typeof rootReduce>;
+export type AppState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export default store;

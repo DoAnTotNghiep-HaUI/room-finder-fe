@@ -18,7 +18,6 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
     containScroll: "keepSnaps",
     dragFree: true,
   });
-  console.log("slides", slides);
 
   const onThumbClick = useCallback(
     (index: number) => {

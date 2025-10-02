@@ -16,6 +16,7 @@ const ChatContainer: React.FC = () => {
   const { conversations, currentConversationId, tempConversation } =
     useSelector((state: AppState) => state.conversation);
   const { userInfo } = useSelector((state: AppState) => state.auth);
+  const { roomDetail } = useSelector((state: AppState) => state.roomDetail);
   const dispatch = useDispatch<AppDispatch>();
   const { userId2 } = useParams();
   const { state } = useChat();
@@ -25,7 +26,7 @@ const ChatContainer: React.FC = () => {
     dispatch(
       checkConversationExists({
         userId1: userInfo?.id,
-        userId2: userId2,
+        userId2: roomDetail?.building?.landlord?.id,
       })
     );
   }, []);

@@ -1,5 +1,6 @@
 import { URL_IMAGE } from "@/constants";
 import { IRoom } from "@/types/room";
+import { formatPrice } from "@/utils/utils";
 import dayjs from "dayjs";
 import React, { useState } from "react";
 import { BiBadgeCheck, BiHeart } from "react-icons/bi";
@@ -147,7 +148,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             Đã đăng {formatDate(room?.date_created)}
           </p>
           <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-            {room?.room_price}VND
+            {room?.room_price.toLocaleString("vi-VN")}VND
             <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
               /Tháng
             </span>

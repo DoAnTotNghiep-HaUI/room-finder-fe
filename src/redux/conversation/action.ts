@@ -11,22 +11,27 @@ export const checkConversationExists = createAsyncThunk(
   "conversation/checkConversationExists",
   async ({ userId1, userId2 }: { userId1: string; userId2: string }) => {
     try {
+      // 1. Lấy tất cả conversation có participant là userId1 hoặc userId2
       const response = await directus.request(
         readItems("conversation", {
           fields: ["*", "participants.directus_users_id.id"],
           filter: {
             participants: {
-              _and: [
-                { directus_users_id: { _eq: userId1 } },
-                { directus_users_id: { _eq: userId2 } },
-              ],
+              directus_users_id: { _in: [userId1, userId2] },
             },
           },
-          limit: 1,
         })
       );
+      const filtered = (response as any[]).filter((conv) => {
+        if (!conv.participants || conv.participants.length !== 2) return false;
+        const ids = conv.participants.map((p: any) => p.directus_users_id?.id);
+        return (
+          ids.includes(userId1) && ids.includes(userId2) && ids.length === 2
+        );
+      });
 
-      return response;
+      // Trả về 1 conversation đầu tiên nếu có
+      return filtered.length > 0 ? [filtered[0]] : [];
     } catch (error) {
       console.error("Error checking conversation:", error);
       throw error;

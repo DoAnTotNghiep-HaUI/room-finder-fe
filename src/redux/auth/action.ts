@@ -1,5 +1,5 @@
 import directus from "@/utils/directus";
-import { readMe, refresh } from "@directus/sdk";
+import { readItems, readMe, refresh, updateUser } from "@directus/sdk";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { logout, setAuthData, setUserInfo } from "./store";
 // import {
@@ -10,7 +10,24 @@ import { logout, setAuthData, setUserInfo } from "./store";
 //   setToken,
 //   setUserInfo,
 // } from "./store";
-
+export const checkExitsUser = createAsyncThunk(
+  "auth/checkExitsUser",
+  async (email: string) => {
+    try {
+      const response: any = await directus.request(
+        readItems("users", {
+          filter: { email: { _eq: email } },
+          fields: ["id", "email"],
+          limit: 1,
+        })
+      );
+      return response.length > 0;
+    } catch (error) {
+      console.log("error", error);
+      return false;
+    }
+  }
+);
 export const getUser = createAsyncThunk("auth/getUser", async () => {
   try {
     const response: any = await directus.request(
@@ -77,5 +94,19 @@ export const refreshToken = createAsyncThunk(
         userInfo: state.auth.userInfo,
       })
     );
+  }
+);
+
+export const updateUserInfo = createAsyncThunk(
+  "auth/updateUser",
+  async (data: { id: string; update: any }, { dispatch, rejectWithValue }) => {
+    try {
+      await directus.request(updateUser(data.id, data.update));
+      const user = await directus.request(readMe({ fields: ["*, avatar.*"] }));
+      dispatch(setUserInfo(user));
+      return user;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || "Cập nhật thông tin thất bại");
+    }
   }
 );

@@ -44,7 +44,9 @@ const ChatIcon: React.FC = () => {
     };
   }, []);
   const unreadCount = conversations?.filter(
-    (conversation) => conversation.unread_count
+    (conversation) =>
+      conversation.unread_count > 0 &&
+      conversation.last_message?.sender !== userInfo?.id
   ).length;
   return (
     <div

@@ -5,6 +5,7 @@ import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import { BiHome, BiMapPin, BiX } from "react-icons/bi";
 import { IRoom } from "@/types/room";
+import { formatPrice } from "@/utils/utils";
 interface RoomMapClusterProps {
   rooms: IRoom[];
 }
@@ -131,7 +132,7 @@ export default function RoomMapCluster({ rooms }: RoomMapClusterProps) {
                       </div>
                       <div className="mt-2 flex justify-between">
                         <span className="text-sm font-semibold text-blue-600">
-                          {room?.room_price}/tháng
+                          {room?.room_price.toLocaleString("vi-VN")}đ/tháng
                         </span>
                         <span className="text-xs text-gray-400">
                           {room?.building.ward},{" "}

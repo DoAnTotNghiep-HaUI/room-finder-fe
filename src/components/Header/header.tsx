@@ -12,6 +12,10 @@ import ModalAuth from "../Auth/modal-auth";
 import { useSelector } from "react-redux";
 import { AppState } from "@/redux";
 import ChatWindowContainer from "../Chat";
+import { useNotification } from "@/hooks/useNotification";
+import Button from "../Button/button";
+import Login from "../Auth/login";
+import Register from "../Auth/register";
 const mockNotifications = [
   {
     id: "notif1",
@@ -39,46 +43,33 @@ const mockNotifications = [
 export const Header = () => {
   const { userInfo } = useSelector((state: AppState) => state.auth);
   console.log("userInfo", userInfo);
-
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    formatNotificationTime,
+  } = useNotification();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+
+  // const [notifications, setNotifications] = useState(mockNotifications);
   const [chats, setChats] = useState(mockNotifications);
   const [showChatPanel, setShowChatPanel] = useState(false);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  // const [unreadCount, setUnreadCount] = useState<number>(0);
   console.log("userInfo", userInfo);
 
   useEffect(() => {
-    const count = notifications.filter(
-      (notification) => !notification.read
-    ).length;
-    setUnreadCount(count);
-  }, [notifications]);
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     if (window.scrollY > 0) {
-  //       setIsScrolled(true);
-  //     } else {
-  //       setIsScrolled(false);
-  //     }
-  //   };
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
+    fetchNotifications();
+  }, [fetchNotifications]);
   const markNotificationAsRead = (notificationId: string) => {
-    setNotifications(
-      notifications.map((notification) =>
-        notification.id === notificationId
-          ? {
-              ...notification,
-              read: true,
-            }
-          : notification
-      )
-    );
+    markAsRead(notificationId);
   };
   const toggleChatPanel = () => {
     setShowChatPanel(!showChatPanel);
@@ -138,7 +129,11 @@ export const Header = () => {
                   <UserProfile user={userInfo} />
                 </>
               ) : (
-                <ModalAuth />
+                <Button
+                  content="Đăng nhập"
+                  onClick={() => setShowLoginModal(true)}
+                  className="rounded-full bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                />
               )}
               {/* <button
                 type="button"
@@ -170,6 +165,16 @@ export const Header = () => {
           </div>
         </div>
       </header>
+      <Login
+        isOpen={showLoginModal && isLogin}
+        onClose={() => setShowLoginModal(false)}
+        setIsLogin={setIsLogin}
+      />
+      <Register
+        isOpen={showLoginModal && !isLogin}
+        onClose={() => setShowLoginModal(false)}
+        setIsLogin={setIsLogin}
+      />
     </>
   );
 };

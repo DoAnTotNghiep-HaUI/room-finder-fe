@@ -323,9 +323,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   key={date}
                   className="message-group"
                 >
-                  {/* Header ngày */}
                   <div className="relative my-4 text-center">
-                    <span className="rounded-xl bg-gray-200 px-2 py-1">
+                    <span className="rounded-xl px-2 py-1 text-sm text-gray-500">
                       {date}
                     </span>
                   </div>

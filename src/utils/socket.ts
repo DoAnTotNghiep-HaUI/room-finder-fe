@@ -12,9 +12,15 @@ let socket: Socket;
 
 //   return socket;
 // };
-export const initializeSocket = (userId: string) => {
+export const initializeSocket = ({
+  userId,
+  path,
+}: {
+  userId: string;
+  path?: string;
+}) => {
   socket = io(`${import.meta.env.VITE_SOCKET_URL}`, {
-    path: "/chat-socket",
+    path: path,
     // auth: { token },
     query: { userId },
     reconnectionAttempts: 5,

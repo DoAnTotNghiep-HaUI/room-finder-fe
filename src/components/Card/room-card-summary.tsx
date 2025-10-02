@@ -1,5 +1,6 @@
 import { URL_IMAGE } from "@/constants";
 import { IRoom } from "@/types/room";
+import { formatPrice } from "@/utils/utils";
 import React from "react";
 import { FaBuilding, FaUser } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
@@ -25,7 +26,7 @@ export default function RoomCardSummary({ room }: { room: IRoom }) {
           {room?.title}
         </p>
         <p className="text-sm font-semibold text-accent">
-          {room?.room_price} đ/tháng
+          {room?.room_price.toLocaleString("vi-VN")} đ/tháng
         </p>
         <span className="line-clamp-1 text-sm">
           <FaLocationDot className="inline-block" />{" "}

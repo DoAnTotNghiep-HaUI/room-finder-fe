@@ -76,6 +76,7 @@ const conversationSlice = createSlice({
         partnerId: null,
         isOpen: false,
       };
+      state.tempConversation = { isOpen: false, partnerId: null };
     },
     // Thêm reducer xử lý tin nhắn từ socket
     //Thử trước sau này sửa lại type cho payloadAction

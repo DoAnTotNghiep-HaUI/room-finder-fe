@@ -1,6 +1,3 @@
-import EmblaCarousel from "@/components/Carousel/embla-thumbs/EmblaCarousel";
-import Layout from "@/layout/layout";
-import { EmblaOptionsType } from "embla-carousel";
 import React, { useEffect, useState } from "react";
 import "../../components/Carousel/embla-thumbs/embla.css";
 import { MediaGallery } from "./media-gallery";
@@ -26,6 +23,9 @@ import {
   createConversation,
   openChatWithUser,
 } from "@/redux/conversation/action";
+import ModalAuth from "@/components/Auth/modal-auth";
+import Login from "@/components/Auth/login";
+import Register from "@/components/Auth/register";
 
 export const RoomDetail = () => {
   const [showContactModal, setShowContactModal] = useState(false);
@@ -35,19 +35,25 @@ export const RoomDetail = () => {
   );
   const { userInfo } = useSelector((state: AppState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  console.log("roomDetail", roomDetail);
 
   const { roomId } = useParams();
   useEffect(() => {
     dispatch(getRoomDetail(roomId));
   }, [roomId]);
   console.log("roomDetail", roomDetail);
-  console.log("photo", roomDetail?.photos);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingData, setBookingData] = useState<{
     date: string;
     time: string;
   } | null>(null);
   const handleOpenModal = () => {
+    if (!userInfo) {
+      setShowLoginModal(true);
+      return;
+    }
     setIsModalOpen(true);
   };
 
@@ -72,70 +78,48 @@ export const RoomDetail = () => {
     // In a real app, you would send this data to your backend
   };
   console.log("currentConversationId", currentConversationId);
+  console.log("userId1", userInfo?.id);
+  console.log("userId2", roomDetail?.building?.landlord?.id);
 
+  // Giả lập
   const handleChatWithOwner = async () => {
+    if (!userInfo) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // 2. Check tồn tại
     const existingConvs = await dispatch(
       checkConversationExists({
-        userId1: userInfo.id,
-        userId2: roomDetail?.building?.landlord?.id,
+        userId1: roomDetail?.building?.landlord?.id,
+        userId2: userInfo?.id,
       })
     ).unwrap();
+    console.log("existingConvs", existingConvs);
 
     let conversationId: string;
 
-    // 2. Nếu đã tồn tại
     if (existingConvs.length > 0) {
       conversationId = existingConvs[0].id;
-      console.log("Using existing conversation:", conversationId);
+      dispatch(setConversationId(conversationId));
+      dispatch(openChatWithUser(roomDetail?.building?.landlord?.id));
+      // Không tạo mới nữa!
+      return;
     }
-    // 3. Nếu chưa tồn tại, tạo mới
-    else {
-      const res = await dispatch(
-        createConversation({
-          participants: [
-            { directus_users_id: userInfo.id },
-            { directus_users_id: roomDetail?.building?.landlord?.id },
-          ],
-        })
-      ).unwrap();
-      conversationId = res.id;
-      console.log("Created new conversation:", conversationId);
-    }
+
+    // 3. Nếu chưa có, tạo mới
+    const res = await dispatch(
+      createConversation({
+        participants: [
+          { directus_users_id: userInfo.id },
+          { directus_users_id: roomDetail?.building?.landlord?.id },
+        ],
+      })
+    ).unwrap();
+    conversationId = res.id;
     dispatch(setConversationId(conversationId));
     dispatch(openChatWithUser(roomDetail?.building?.landlord?.id));
   };
-  const roomData = {
-    title: "Modern Studio Apartment in Downtown",
-    images: [
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-      "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6",
-      "https://images.unsplash.com/photo-1484101403633-562f891dc89a",
-    ],
-    videos: [
-      {
-        url: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
-        poster: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-        title: "Living Room Tour",
-      },
-      {
-        url: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
-        poster: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6",
-        title: "Kitchen & Dining Area",
-      },
-    ],
-    price: 1200,
-    size: "450 sq ft",
-    rentalType: "Monthly",
-    deposit: 2400,
-    status: "Available",
-    location: {
-      lat: 40.7128,
-      lng: -74.006,
-      address: "123 Main Street, New York, NY 10001",
-    },
-  };
-  console.log("video", roomDetail?.video);
-
   return (
     <>
       <div className="min-h-screen bg-gray-50">
@@ -200,35 +184,47 @@ export const RoomDetail = () => {
             </div>
           </div>
         </div>
-        <ContactOwner roomData={roomData} />
+        {/* <ContactOwner roomData={roomData} /> */}
       </div>
-      {bookingData && (
-        // <div className="mt-4 rounded-md bg-green-100 p-4">
-        //   <h2 className="font-semibold text-green-800">Booking Confirmed!</h2>
-        //   <p className="text-green-700">
-        //     Date: {new Date(bookingData.date).toLocaleDateString()}
-        //   </p>
-        //   <p className="text-green-700">Time: {bookingData.time}</p>
-        // </div>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-          transition={Slide}
-        />
-      )}
+      {/* {bookingData && (
+        <div className="mt-4 rounded-md bg-green-100 p-4">
+          <h2 className="font-semibold text-green-800">Booking Confirmed!</h2>
+          <p className="text-green-700">
+            Date: {new Date(bookingData.date).toLocaleDateString()}
+          </p>
+          <p className="text-green-700">Time: {bookingData.time}</p>
+        </div> */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Slide}
+      />
+      {/* )} */}
 
       <BookingModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onSubmit={handleSubmit}
+        room_id={roomDetail?.id}
+        landlord_id={roomDetail?.building?.landlord?.id}
+        tenant_id={userInfo?.id}
+      />
+      <Login
+        isOpen={showLoginModal && isLogin}
+        onClose={() => setShowLoginModal(false)}
+        setIsLogin={setIsLogin}
+      />
+      <Register
+        isOpen={showLoginModal && !isLogin}
+        onClose={() => setShowLoginModal(false)}
+        setIsLogin={setIsLogin}
       />
     </>
   );

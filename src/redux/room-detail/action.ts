@@ -31,6 +31,8 @@ export const getRoomDetail = createAsyncThunk(
           ],
         })
       );
+      console.log("data", data);
+
       const response: IRoom = {
         ...data,
         services: data.services.map((s: any) => s.service_id),

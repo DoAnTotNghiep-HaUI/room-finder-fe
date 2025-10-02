@@ -13,8 +13,8 @@ export const OwnerProfile = ({ owner }) => {
   //   joinDate: "Member since 2020",
   //   avatar: "https://placehold.co/200x200?text=SJ",
   // };
-  console.log("owner", owner);
-  console.log("verified", owner?.landlord_verification[0]?.isVerified);
+  // console.log("owner", owner);
+  // console.log("verified", owner?.landlord_verification[0]?.isVerified);
 
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
@@ -45,7 +45,7 @@ export const OwnerProfile = ({ owner }) => {
         </div>
       </div>
       <div className="mt-4 space-y-3">
-        {owner?.landlord_verification[0]?.isVerified === true ? (
+        {owner?.landlord_verification[0]?.status === "fullfiled" ? (
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <BiShield className="h-4 w-4 text-green-600" />
             <span>Đã xác minh</span>
